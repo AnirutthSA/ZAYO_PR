@@ -1,0 +1,47 @@
+{
+  "$schema": "https://developer.microsoft.com/en-us/json-schemas/teams/v1.23/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.23",
+  "version": "1.0.0",
+  "id": "12345678-1234-1234-1234-123456789012",
+  "developer": {
+    "name": "Anirutth",
+    "websiteUrl": "https://relaxed-shortbread-241e72.netlify.app",
+    "privacyUrl": "https://relaxed-shortbread-241e72.netlify.app",
+    "termsOfUseUrl": "https://relaxed-shortbread-241e72.netlify.app"
+  },
+  "icons": {
+    "color": "color.png",
+    "outline": "outline.png"
+  },
+  "name": {
+    "short": "ZAYO Purchase Request Assistant",
+    "full": "Purchase Requisit Assistant"
+  },
+  "description": {
+    "short": "PR Request App",
+    "full": "Purchase Requisition Assistant App"
+  },
+  "accentColor": "#FFFFFF",
+  "bots": [],
+  "composeExtensions": [],
+  "staticTabs": [
+    {
+      "entityId": "index0",
+      "name": "PR Assistant",
+      "contentUrl": "https://relaxed-shortbread-241e72.netlify.app",
+      "websiteUrl": "https://relaxed-shortbread-241e72.netlify.app",
+      "scopes": [
+        "personal",
+        "groupChat",
+        "team"
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "relaxed-shortbread-241e72.netlify.app"
+  ]
+}
