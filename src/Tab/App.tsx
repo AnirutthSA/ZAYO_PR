@@ -31,7 +31,7 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 400, margin: "40px auto", padding: 20 }}>
-      <h2>📋 PR Assistant</h2>
+      <h2>📋 Purchase Request Assistant Assistant</h2>
 
       <div style={{ marginBottom: 16 }}>
         <label>Vendor Name</label>
@@ -81,7 +81,7 @@ export default function App() {
           cursor: "pointer"
         }}
       >
-        ✅ Submit PR
+        ✅ Submit Purchase Request 
       </button>
     </div>
   );

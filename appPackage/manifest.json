@@ -5,20 +5,20 @@
   "id": "12345678-1234-1234-1234-123456789012",
   "developer": {
     "name": "Anirutth",
-    "websiteUrl": "https://relaxed-shortbread-241e72.netlify.app",
-    "privacyUrl": "https://relaxed-shortbread-241e72.netlify.app",
-    "termsOfUseUrl": "https://relaxed-shortbread-241e72.netlify.app"
+    "websiteUrl": "https://zayo-git-netligy-react2.netlify.app",
+    "privacyUrl": "https://zayo-git-netligy-react2.netlify.app",
+    "termsOfUseUrl": "https://zayo-git-netligy-react2.netlify.app"
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
   "name": {
-    "short": "ZAYO Purchase Request Assistant",
-    "full": "Purchase Requisit Assistant"
+    "short": "ZAYO Purchase Request",
+    "full": "ZAYO Purchase Requisition Assistant"
   },
   "description": {
-    "short": "PR Request App",
+    "short": "ZAYO Purchase Request Assistant",
     "full": "Purchase Requisition Assistant App"
   },
   "accentColor": "#FFFFFF",
@@ -27,9 +27,9 @@
   "staticTabs": [
     {
       "entityId": "index0",
-      "name": "PR Assistant",
-      "contentUrl": "https://relaxed-shortbread-241e72.netlify.app",
-      "websiteUrl": "https://relaxed-shortbread-241e72.netlify.app",
+      "name": "ZAYO Purchase Request Assistant",
+      "contentUrl": "https://zayo-git-netligy-react2.netlify.app",
+      "websiteUrl": "https://zayo-git-netligy-react2.netlify.app",
       "scopes": [
         "personal",
         "groupChat",
@@ -42,6 +42,6 @@
     "messageTeamMembers"
   ],
   "validDomains": [
-    "relaxed-shortbread-241e72.netlify.app"
+    "zayo-git-netligy-react2.netlify.app"
   ]
 }
