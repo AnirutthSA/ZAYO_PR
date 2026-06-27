@@ -112,6 +112,7 @@ const expenseSteps = [
 
 export default function App() {
   const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const C = themePalettes[themeMode];
   const [screen, setScreen] = useState<Screen>("home");
   const [messages, setMessages] = useState<Message[]>([]);
@@ -263,40 +264,59 @@ export default function App() {
   };
 
   const Sidebar = () => (
-    <div style={{ width: 190, background: C.navy, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
-      <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: C.white, fontStyle: "italic" }}>Z</div>
-          <div>
-            <div style={{ color: C.white, fontWeight: 700, fontSize: 12 }}>ZAYO Purchase Request</div>
-            <div style={{ color: C.subtle, fontSize: 9 }}>Purchase Assistant</div>
+    <div style={{ width: isSidebarCollapsed ? 68 : 190, background: C.navy, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0, transition: "width 0.2s ease" }}>
+      <div style={{ padding: isSidebarCollapsed ? "12px 10px" : "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "space-between", gap: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: C.white, fontStyle: "italic", flexShrink: 0 }}>Z</div>
+            {!isSidebarCollapsed && (
+              <div style={{ minWidth: 0 }}>
+                <div style={{ color: C.white, fontWeight: 700, fontSize: 12, whiteSpace: "nowrap" }}>ZAYO Purchase Request</div>
+                <div style={{ color: C.subtle, fontSize: 9 }}>Purchase Assistant</div>
+              </div>
+            )}
           </div>
+          {!isSidebarCollapsed && (
+            <button onClick={() => setIsSidebarCollapsed(true)} title="Collapse sidebar" style={{ width: 26, height: 26, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>‹</button>
+          )}
         </div>
+        {isSidebarCollapsed && (
+          <button onClick={() => setIsSidebarCollapsed(false)} title="Expand sidebar" style={{ width: "100%", height: 26, marginTop: 10, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>›</button>
+        )}
       </div>
       <nav style={{ flex: 1, padding: "8px 0" }}>
-        {[{ id: "home", label: "Home" }, { id: "my-purchase-requests", label: "My Purchase Requests" }, { id: "approvals", label: "Approvals" }].map(item => (
-          <div key={item.id} onClick={() => setScreen(item.id as Screen)} style={{ padding: "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: screen === item.id ? C.white : C.subtle, background: screen === item.id ? C.mid : "transparent", borderLeft: screen === item.id ? `3px solid ${C.orange}` : "3px solid transparent", transition: "all 0.2s", fontWeight: screen === item.id ? 600 : 400 }}>
-            {item.label}
-          </div>
-        ))}
-        <div style={{ padding: "16px 14px 8px" }}>
-          <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Request</div>
+        {[
+          { id: "home", label: "Home", icon: "home" as const },
+          { id: "my-purchase-requests", label: "My Purchase Requests", icon: "requests" as const },
+          { id: "approvals", label: "Approvals", icon: "approvals" as const },
+        ].map(item => {
+          const isActive = screen === item.id;
+          return (
+            <div key={item.id} title={isSidebarCollapsed ? item.label : undefined} onClick={() => setScreen(item.id as Screen)} style={{ padding: isSidebarCollapsed ? "10px 0" : "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: 12, color: isActive ? C.white : C.subtle, background: isActive ? C.mid : "transparent", borderLeft: isActive ? `3px solid ${C.orange}` : "3px solid transparent", transition: "all 0.2s", fontWeight: isActive ? 600 : 400 }}>
+              <NavIcon name={item.icon} color={isActive ? C.orange : C.subtle} />
+              {!isSidebarCollapsed && item.label}
+            </div>
+          );
+        })}
+        <div style={{ padding: isSidebarCollapsed ? "14px 8px 8px" : "16px 14px 8px" }}>
+          {!isSidebarCollapsed && <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Request</div>}
           {[{ type: "inventory" as PurchaseRequestType, label: "Inventory Purchase Request" }, { type: "expense" as PurchaseRequestType, label: "Expense Purchase Request" }].map(item => (
-            <div key={item.type} onClick={() => startChat(item.type)} style={{ padding: "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: C.subtle, borderRadius: 6, marginBottom: 4 }}>
-              {item.label}
+            <div key={item.type} title={isSidebarCollapsed ? item.label : undefined} onClick={() => startChat(item.type)} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
+              {isSidebarCollapsed ? item.label.split(" ")[0] : item.label}
             </div>
           ))}
         </div>
       </nav>
-      <div style={{ padding: 10, borderTop: `1px solid ${C.border}` }}>
-        <div style={{ background: C.mid, border: `1px dashed ${C.border}`, borderRadius: 8, padding: "8px 10px", cursor: "pointer" }}>
-          <div style={{ fontSize: 10, color: C.orange, fontWeight: 700, marginBottom: 2 }}>Attach Documents</div>
-          <div style={{ fontSize: 8, color: C.subtle }}>Quotes, invoices, specifications</div>
+      {!isSidebarCollapsed && (
+        <div style={{ padding: 10, borderTop: `1px solid ${C.border}` }}>
+          <div style={{ background: C.mid, border: `1px dashed ${C.border}`, borderRadius: 8, padding: "8px 10px", cursor: "pointer" }}>
+            <div style={{ fontSize: 10, color: C.orange, fontWeight: 700, marginBottom: 2 }}>Attach Documents</div>
+            <div style={{ fontSize: 8, color: C.subtle }}>Quotes, invoices, specifications</div>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
-
   const HomeScreen = () => (
     <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
       <div style={{ marginBottom: 24 }}>
@@ -344,13 +364,25 @@ export default function App() {
         </div>
         <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request"}</div>
       </div>
-      <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "9px 16px 11px", flexShrink: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 7 }}>
+      <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 12px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
           <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>Purchase Request Progress</span>
           <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
         </div>
-        <div style={{ height: 7, background: C.dark, border: `1px solid ${C.border}`, borderRadius: 999, overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${progressPercent}%`, background: C.orange, borderRadius: 999, transition: "width 0.25s ease" }} />
+        <div style={{ position: "relative", display: "grid", gridTemplateColumns: `repeat(${activeSteps.length}, minmax(24px, 1fr))`, alignItems: "center", gap: 4 }}>
+          <div style={{ position: "absolute", left: 12, right: 12, top: 13, height: 3, background: C.dark, borderRadius: 999 }} />
+          <div style={{ position: "absolute", left: 12, right: `${100 - progressPercent}%`, top: 13, height: 3, background: C.good, borderRadius: 999, transition: "right 0.25s ease" }} />
+          {activeSteps.map((step, index) => {
+            const isComplete = hasSubmitted || hasReview || index < currentStep;
+            const isCurrent = !isComplete && index === Math.min(currentStep, activeSteps.length - 1);
+            return (
+              <div key={step.field} title={step.message} style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0 }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: isComplete ? C.good : isCurrent ? C.orange : C.card, border: `2px solid ${isComplete ? C.good : isCurrent ? C.orange : C.border}`, color: isComplete || isCurrent ? "#ffffff" : C.subtle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, boxShadow: `0 4px 10px ${C.shadow}` }}>
+                  {isComplete ? "✓" : index + 1}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -571,6 +603,10 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
 
 
 
