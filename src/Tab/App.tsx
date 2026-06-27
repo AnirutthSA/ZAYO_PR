@@ -111,6 +111,8 @@ const expenseSteps = [
 
 
 export default function App() {
+  const [themeMode, setThemeMode] = useState<ThemeMode>("dark");
+  const C = themePalettes[themeMode];
   const [screen, setScreen] = useState<Screen>("home");
   const [messages, setMessages] = useState<Message[]>([]);
   const [purchaseRequestType, setPurchaseRequestType] = useState<PurchaseRequestType>(null);
@@ -569,6 +571,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
