@@ -135,6 +135,17 @@ export default function App() {
   const progressStep = hasSubmitted || hasReview ? activeSteps.length : Math.min(currentStep + 1, activeSteps.length);
   const progressPercent = purchaseRequestType ? Math.round((progressStep / activeSteps.length) * 100) : 0;
 
+
+  const NavIcon = ({ name, color }: { name: "home" | "requests" | "approvals"; color: string }) => {
+    const common = { fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+    if (name === "home") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M3 10.5 12 3l9 7.5" /><path {...common} d="M5 10v10h14V10" /><path {...common} d="M9 20v-6h6v6" /></svg>;
+    }
+    if (name === "requests") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M8 6h11" /><path {...common} d="M8 12h11" /><path {...common} d="M8 18h11" /><path {...common} d="M4 6h.01" /><path {...common} d="M4 12h.01" /><path {...common} d="M4 18h.01" /></svg>;
+    }
+    return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="8" /><path {...common} d="M12 7v5l3 2" /></svg>;
+  };
   const Badge = ({ status }: { status: string }) => {
     const color = status === "Approved" ? C.good : status === "Pending" ? C.warn : C.danger;
     return <span style={{ background: color + "22", color, border: `1px solid ${color}44`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{status}</span>;
@@ -186,7 +197,7 @@ export default function App() {
 
     setTimeout(() => {
       const steps = type === "inventory" ? inventorySteps : expenseSteps;
-      const step = steps[0];
+      const step: any = steps[0];
       addMessage({ type: step.type === "options" ? "options" : "input", content: step.message, field: step.field, options: step.options, inputType: step.type, placeholder: step.placeholder, searchable: step.type === "search" });
     }, 1200);
   };
@@ -487,7 +498,7 @@ export default function App() {
                     <span style={{ background: C.warn + "22", color: C.warn, fontSize: 10, padding: "2px 8px", borderRadius: 10 }}>Draft</span>
                   </div>
                   <div style={{ padding: "12px 14px" }}>
-                    {Object.entries(msg.cardData).filter(([k, v]) => v && v !== "-").map(([key, val]) => (
+                    {Object.entries(msg.cardData).filter(([, v]) => v && v !== "-").map(([key, val]) => (
                       <div key={key} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
                         <span style={{ color: C.subtle, textTransform: "capitalize" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>
                         <span style={{ color: C.white, fontWeight: 500 }}>{String(val)}</span>
@@ -594,6 +605,7 @@ export default function App() {
         ::-webkit-scrollbar-thumb { background: #1a3040; border-radius: 2px; }
       `}</style>
       <Sidebar />
+      <div style={{ position: "absolute", top: 10, right: 14, zIndex: 20 }}><ThemeSwitcher /></div>
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {screen === "home" && <HomeScreen />}
         {screen === "chat" && <ChatScreen />}
@@ -603,12 +615,4 @@ export default function App() {
     </div>
   );
 }
-
-
-
-
-
-
-
-
 
