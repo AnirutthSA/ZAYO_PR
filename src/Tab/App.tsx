@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+﻿import { useState, useEffect, useRef } from "react";
 
 type Screen = "home" | "chat" | "my-purchase-requests" | "approvals";
 type PurchaseRequestType = "inventory" | "expense" | null;
+type ThemeMode = "dark" | "light" | "contrast";
 type MessageType = "bot" | "user" | "card" | "options" | "input" | "review" | "success";
 
 interface Message {
@@ -35,19 +36,52 @@ const pendingApprovals = [
   { id: "Purchase Request 2024-005", requestedBy: "Sarah Lee", type: "Expense", item: "Training Materials", amount: "$250", date: "2024-06-22" },
 ];
 
-const C = {
-  orange: "#e87722",
-  navy: "#0f2d48",
-  dark: "#0a1520",
-  mid: "#0f2236",
-  card: "#132030",
-  border: "#1a3040",
-  text: "#ccd6e0",
-  subtle: "#88aabb",
-  good: "#2ecc71",
-  warn: "#f39c12",
-  danger: "#e74c3c",
-  white: "#ffffff",
+const themePalettes = {
+  dark: {
+    orange: "#e87722",
+    navy: "#0f2d48",
+    dark: "#0a1520",
+    mid: "#0f2236",
+    card: "#132030",
+    border: "#1a3040",
+    text: "#ccd6e0",
+    subtle: "#88aabb",
+    good: "#2ecc71",
+    warn: "#f39c12",
+    danger: "#e74c3c",
+    white: "#ffffff",
+    shadow: "rgba(0, 0, 0, 0.28)",
+  },
+  light: {
+    orange: "#e87722",
+    navy: "#ffffff",
+    dark: "#f4f7fb",
+    mid: "#ffffff",
+    card: "#f8fbff",
+    border: "#d8e1ea",
+    text: "#233142",
+    subtle: "#617287",
+    good: "#198754",
+    warn: "#b26a00",
+    danger: "#c0392b",
+    white: "#102033",
+    shadow: "rgba(15, 45, 72, 0.12)",
+  },
+  contrast: {
+    orange: "#00a6a6",
+    navy: "#22223b",
+    dark: "#191724",
+    mid: "#2a273f",
+    card: "#312f4f",
+    border: "#4d486f",
+    text: "#f2e9e4",
+    subtle: "#c9ada7",
+    good: "#8ac926",
+    warn: "#ffca3a",
+    danger: "#ff595e",
+    white: "#ffffff",
+    shadow: "rgba(0, 0, 0, 0.35)",
+  },
 };
 
 const inventorySteps = [
@@ -75,10 +109,6 @@ const expenseSteps = [
   { field: "acknowledged", type: "acknowledge", message: "Almost done. Please acknowledge:" },
 ];
 
-const Badge = ({ status }: { status: string }) => {
-  const color = status === "Approved" ? C.good : status === "Pending" ? C.warn : C.danger;
-  return <span style={{ background: color + "22", color, border: `1px solid ${color}44`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{status}</span>;
-};
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
@@ -90,6 +120,47 @@ export default function App() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const themeOptions: { mode: ThemeMode; label: string }[] = [
+    { mode: "dark", label: "Dark" },
+    { mode: "light", label: "Light" },
+    { mode: "contrast", label: "Focus" },
+  ];
+  const activeSteps = purchaseRequestType === "inventory" ? inventorySteps : expenseSteps;
+  const hasSubmitted = messages.some(msg => msg.type === "success");
+  const hasReview = messages.some(msg => msg.type === "review");
+  const progressStep = hasSubmitted || hasReview ? activeSteps.length : Math.min(currentStep + 1, activeSteps.length);
+  const progressPercent = purchaseRequestType ? Math.round((progressStep / activeSteps.length) * 100) : 0;
+
+  const Badge = ({ status }: { status: string }) => {
+    const color = status === "Approved" ? C.good : status === "Pending" ? C.warn : C.danger;
+    return <span style={{ background: color + "22", color, border: `1px solid ${color}44`, borderRadius: 20, padding: "2px 10px", fontSize: 11, fontWeight: 700 }}>{status}</span>;
+  };
+
+  const ThemeSwitcher = () => (
+    <div style={{ display: "flex", gap: 2, background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: 3, boxShadow: `0 8px 18px ${C.shadow}` }}>
+      {themeOptions.map(option => (
+        <button
+          key={option.mode}
+          onClick={() => setThemeMode(option.mode)}
+          title={`${option.label} mode`}
+          style={{
+            background: themeMode === option.mode ? C.orange : "transparent",
+            border: "none",
+            borderRadius: 6,
+            color: themeMode === option.mode ? "#ffffff" : C.subtle,
+            cursor: "pointer",
+            fontSize: 10,
+            fontWeight: 700,
+            minWidth: 42,
+            padding: "5px 7px",
+          }}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
@@ -190,7 +261,7 @@ export default function App() {
   };
 
   const Sidebar = () => (
-    <div style={{ width: 190, background: "#060e18", borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
+    <div style={{ width: 190, background: C.navy, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0 }}>
       <div style={{ padding: "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: C.white, fontStyle: "italic" }}>Z</div>
@@ -269,7 +340,16 @@ export default function App() {
           <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Request Assistant</div>
           <div style={{ color: C.good, fontSize: 9, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: C.good }} />Active</div>
         </div>
-        <div style={{ marginLeft: "auto", fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request"}</div>
+        <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request"}</div>
+      </div>
+      <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "9px 16px 11px", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 7 }}>
+          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>Purchase Request Progress</span>
+          <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
+        </div>
+        <div style={{ height: 7, background: C.dark, border: `1px solid ${C.border}`, borderRadius: 999, overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${progressPercent}%`, background: C.orange, borderRadius: 999, transition: "width 0.25s ease" }} />
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
@@ -471,7 +551,7 @@ export default function App() {
   );
 
   return (
-    <div style={{ fontFamily: "'Segoe UI', sans-serif", background: C.dark, height: "100vh", display: "flex", overflow: "hidden" }}>
+    <div style={{ fontFamily: "'Segoe UI', sans-serif", background: C.dark, height: "100vh", display: "flex", overflow: "hidden", position: "relative" }}>
       <style>{`
         @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
         input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
@@ -489,3 +569,6 @@ export default function App() {
     </div>
   );
 }
+
+
+
