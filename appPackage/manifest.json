@@ -5,31 +5,31 @@
   "id": "12345678-1234-1234-1234-123456789012",
   "developer": {
     "name": "Anirutth",
-    "websiteUrl": "https://zayo-no0v7y35e-zayo-pr-app.vercel.app",
-    "privacyUrl": "https://zayo-no0v7y35e-zayo-pr-app.vercel.app",
-    "termsOfUseUrl": "https://zayo-no0v7y35e-zayo-pr-app.vercel.app"
+    "websiteUrl": "https://zayo-pr.vercel.app",
+    "privacyUrl": "https://zayo-pr.vercel.app",
+    "termsOfUseUrl": "https://zayo-pr.vercel.app"
   },
   "icons": {
     "color": "color.png",
     "outline": "outline.png"
   },
   "name": {
-    "short": "ZAYO Purchase Request",
-    "full": "ZAYO Purchase Requisition Assistant"
+    "short": "Purchase Request Assistant",
+    "full": "Purchase Request Assistant"
   },
   "description": {
-    "short": "ZAYO Purchase Request Assistant",
-    "full": "Purchase Requisition Assistant App"
+    "short": "Purchase Request Assistant",
+    "full": "Purchase Request Assistant"
   },
-  "accentColor": "#FFFFFF",
+  "accentColor": "#e87722",
   "bots": [],
   "composeExtensions": [],
   "staticTabs": [
     {
       "entityId": "index0",
       "name": "ZAYO Purchase Request Assistant",
-      "contentUrl": "https://zayo-no0v7y35e-zayo-pr-app.vercel.app",
-      "websiteUrl": "https://zayo-no0v7y35e-zayo-pr-app.vercel.app",
+      "contentUrl": "https://zayo-pr.vercel.app",
+      "websiteUrl": "https://zayo-pr.vercel.app",
       "scopes": [
         "personal",
         "groupChat",
@@ -42,6 +42,6 @@
     "messageTeamMembers"
   ],
   "validDomains": [
-    "zayo-no0v7y35e-zayo-pr-app.vercel.app"
+    "zayo-pr.vercel.app"
   ]
 }

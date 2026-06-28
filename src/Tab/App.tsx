@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type Screen = "home" | "chat" | "my-purchase-requests" | "approvals";
 type PurchaseRequestType = "inventory" | "expense" | null;
@@ -54,7 +54,7 @@ const themePalettes = {
   },
   light: {
     orange: "#e87722",
-    navy: "#ffffff",
+    navy: "#0f2d48",
     dark: "#f4f7fb",
     mid: "#ffffff",
     card: "#f8fbff",
@@ -68,17 +68,17 @@ const themePalettes = {
     shadow: "rgba(15, 45, 72, 0.12)",
   },
   contrast: {
-    orange: "#00a6a6",
-    navy: "#22223b",
-    dark: "#191724",
-    mid: "#2a273f",
-    card: "#312f4f",
-    border: "#4d486f",
-    text: "#f2e9e4",
-    subtle: "#c9ada7",
-    good: "#8ac926",
-    warn: "#ffca3a",
-    danger: "#ff595e",
+    orange: "#e87722",
+    navy: "#0f2d48",
+    dark: "#08111b",
+    mid: "#102941",
+    card: "#143653",
+    border: "#2f5c7d",
+    text: "#f3f8fc",
+    subtle: "#b6c9d8",
+    good: "#2ecc71",
+    warn: "#f39c12",
+    danger: "#e74c3c",
     white: "#ffffff",
     shadow: "rgba(0, 0, 0, 0.35)",
   },
@@ -134,15 +134,23 @@ export default function App() {
   const hasReview = messages.some(msg => msg.type === "review");
   const progressStep = hasSubmitted || hasReview ? activeSteps.length : Math.min(currentStep + 1, activeSteps.length);
   const progressPercent = purchaseRequestType ? Math.round((progressStep / activeSteps.length) * 100) : 0;
+  const navigationItems: { id: Screen; label: string; icon: "home" | "current" | "requests" | "approvals" }[] = [
+    { id: "home", label: "Home", icon: "home" },
+    ...(purchaseRequestType ? [{ id: "chat" as const, label: "Current Purchase Request", icon: "current" as const }] : []),
+    { id: "my-purchase-requests", label: "My Purchase Requests", icon: "requests" },
+    { id: "approvals", label: "Approvals", icon: "approvals" },
+  ];
 
-
-  const NavIcon = ({ name, color }: { name: "home" | "requests" | "approvals"; color: string }) => {
+  const NavIcon = ({ name, color }: { name: "home" | "current" | "requests" | "approvals"; color: string }) => {
     const common = { fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
     if (name === "home") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M3 10.5 12 3l9 7.5" /><path {...common} d="M5 10v10h14V10" /><path {...common} d="M9 20v-6h6v6" /></svg>;
     }
     if (name === "requests") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M8 6h11" /><path {...common} d="M8 12h11" /><path {...common} d="M8 18h11" /><path {...common} d="M4 6h.01" /><path {...common} d="M4 12h.01" /><path {...common} d="M4 18h.01" /></svg>;
+    }
+    if (name === "current") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M7 3h7l4 4v14H7z" /><path {...common} d="M14 3v5h5" /><path {...common} d="M10 13h5" /><path {...common} d="M10 17h4" /></svg>;
     }
     return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="8" /><path {...common} d="M12 7v5l3 2" /></svg>;
   };
@@ -279,7 +287,7 @@ export default function App() {
       <div style={{ padding: isSidebarCollapsed ? "12px 10px" : "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "space-between", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: C.white, fontStyle: "italic", flexShrink: 0 }}>Z</div>
+            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", flexShrink: 0 }}>Z</div>
             {!isSidebarCollapsed && (
               <div style={{ minWidth: 0 }}>
                 <div style={{ color: C.white, fontWeight: 700, fontSize: 12, whiteSpace: "nowrap" }}>ZAYO Purchase Request</div>
@@ -288,19 +296,15 @@ export default function App() {
             )}
           </div>
           {!isSidebarCollapsed && (
-            <button onClick={() => setIsSidebarCollapsed(true)} title="Collapse sidebar" style={{ width: 26, height: 26, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>‹</button>
+            <button onClick={() => setIsSidebarCollapsed(true)} title="Collapse sidebar" style={{ width: 26, height: 26, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>&lt;</button>
           )}
         </div>
         {isSidebarCollapsed && (
-          <button onClick={() => setIsSidebarCollapsed(false)} title="Expand sidebar" style={{ width: "100%", height: 26, marginTop: 10, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>›</button>
+          <button onClick={() => setIsSidebarCollapsed(false)} title="Expand sidebar" style={{ width: "100%", height: 26, marginTop: 10, background: C.card, border: `1px solid ${C.border}`, borderRadius: 6, color: C.subtle, cursor: "pointer", fontSize: 12 }}>&gt;</button>
         )}
       </div>
       <nav style={{ flex: 1, padding: "8px 0" }}>
-        {[
-          { id: "home", label: "Home", icon: "home" as const },
-          { id: "my-purchase-requests", label: "My Purchase Requests", icon: "requests" as const },
-          { id: "approvals", label: "Approvals", icon: "approvals" as const },
-        ].map(item => {
+        {navigationItems.map(item => {
           const isActive = screen === item.id;
           return (
             <div key={item.id} title={isSidebarCollapsed ? item.label : undefined} onClick={() => setScreen(item.id as Screen)} style={{ padding: isSidebarCollapsed ? "10px 0" : "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: 12, color: isActive ? C.white : C.subtle, background: isActive ? C.mid : "transparent", borderLeft: isActive ? `3px solid ${C.orange}` : "3px solid transparent", transition: "all 0.2s", fontWeight: isActive ? 600 : 400 }}>
@@ -336,9 +340,9 @@ export default function App() {
         <div style={{ fontSize: 13, color: C.subtle }}>Create and track purchase requests through a guided conversation</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24, maxWidth: 500 }}>
-        {[{ type: "inventory" as PurchaseRequestType, title: "Inventory Purchase Request", desc: "Request items from item master with auto-fill", color: C.orange }, { type: "expense" as PurchaseRequestType, title: "Expense Purchase Request", desc: "Request goods or services with custom details", color: "#6264a7" }].map(card => (
+        {[{ type: "inventory" as PurchaseRequestType, title: "Inventory Purchase Request", desc: "Request items from item master with auto-fill", color: C.orange }, { type: "expense" as PurchaseRequestType, title: "Expense Purchase Request", desc: "Request goods or services with custom details", color: C.navy }].map(card => (
           <div key={card.type} onClick={() => startChat(card.type)} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, cursor: "pointer", borderTop: `3px solid ${card.color}` }}>
-            <div style={{ width: 30, height: 30, background: card.color, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: C.white, fontStyle: "italic", marginBottom: 10 }}>Z</div>
+            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", marginBottom: 10 }}>Z</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>{card.title}</div>
             <div style={{ fontSize: 11, color: C.subtle }}>{card.desc}</div>
           </div>
@@ -346,7 +350,7 @@ export default function App() {
       </div>
       <div style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden", maxWidth: 600 }}>
         <div style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.white }}>Recent Requests</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.white }}>Recent Purchase Requests</div>
         </div>
         {samplePurchaseRequests.map(pr => (
           <div key={pr.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -357,6 +361,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 12, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense")} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer", whiteSpace: "nowrap" }}>Re-initiate Purchase Request</button>
             </div>
           </div>
         ))}
@@ -368,7 +373,7 @@ export default function App() {
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ background: C.navy, borderBottom: `2px solid ${C.orange}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         <button onClick={() => setScreen("home")} style={{ background: "transparent", border: "none", color: C.subtle, cursor: "pointer", fontSize: 16 }}>Back</button>
-        <div style={{ width: 28, height: 28, background: C.orange, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>Z</div>
+        <div style={{ width: 28, height: 28, background: C.orange, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#ffffff", fontWeight: 900 }}>Z</div>
         <div>
           <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Request Assistant</div>
           <div style={{ color: C.good, fontSize: 9, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: C.good }} />Active</div>
@@ -389,7 +394,7 @@ export default function App() {
             return (
               <div key={step.field} title={step.message} style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, minWidth: 0 }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: isComplete ? C.good : isCurrent ? C.orange : C.card, border: `2px solid ${isComplete ? C.good : isCurrent ? C.orange : C.border}`, color: isComplete || isCurrent ? "#ffffff" : C.subtle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, boxShadow: `0 4px 10px ${C.shadow}` }}>
-                  {isComplete ? "✓" : index + 1}
+                  {isComplete ? "\u2713" : index + 1}
                 </div>
               </div>
             );
@@ -402,7 +407,7 @@ export default function App() {
           <div key={msg.id}>
             {msg.type === "bot" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.content}</div>
               </div>
             )}
@@ -415,7 +420,7 @@ export default function App() {
 
             {msg.type === "card" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "85%" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", flex: 1 }}>
                   <div style={{ background: C.good + "22", padding: "8px 12px", fontSize: 11, fontWeight: 700, color: C.good }}>{msg.cardData.title}</div>
                   <div style={{ padding: "10px 12px" }}>
@@ -432,7 +437,7 @@ export default function App() {
 
             {msg.type === "options" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -448,7 +453,7 @@ export default function App() {
 
             {msg.type === "input" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   {msg.searchable ? (
@@ -491,7 +496,7 @@ export default function App() {
 
             {msg.type === "review" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", flex: 1, maxWidth: "85%" }}>
                   <div style={{ background: C.navy, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>Purchase Request Summary</div>
@@ -515,7 +520,7 @@ export default function App() {
 
             {msg.type === "success" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, flexShrink: 0 }}>Z</div>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", maxWidth: "85%" }}>
                   <div style={{ background: C.good + "22", padding: "14px", textAlign: "center" }}>
                     <div style={{ fontSize: 32, marginBottom: 4 }}>Z</div>
@@ -541,7 +546,7 @@ export default function App() {
 
         {isTyping && (
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12 }}>Z</div>
+            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900 }}>Z</div>
             <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", display: "flex", gap: 4 }}>
               {[0, 1, 2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.subtle, animation: `bounce 1s ${i * 0.2}s infinite` }} />)}
             </div>
@@ -565,7 +570,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
-              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense")} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Reuse</button>
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense")} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Re-initiate Purchase Request</button>
             </div>
           </div>
         ))}
