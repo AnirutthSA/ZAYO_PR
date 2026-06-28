@@ -18,11 +18,46 @@ interface Message {
 }
 
 const itemMasterData = [
-  { id: "Item 001", name: "Laptop Dell XPS 15", unitPrice: "1200", warehouse: "East Warehouse 01" },
-  { id: "Item 002", name: "Network Switch 24-Port", unitPrice: "800", warehouse: "West Warehouse 02" },
-  { id: "Item 003", name: "Uninterruptible Power Supply Battery 1500 Volt Ampere", unitPrice: "350", warehouse: "East Warehouse 01" },
-  { id: "Item 004", name: "Server Memory 32 Gigabyte", unitPrice: "280", warehouse: "Central Warehouse 03" },
-  { id: "Item 005", name: "Fiber Optic Cable 100 meter", unitPrice: "150", warehouse: "West Warehouse 02" },
+  { id: "ITEM-10001", name: "Cisco Router 4451", unitPrice: "1200", warehouse: "WH-DENVER-01", taskNumber: "TASK-001", taskName: "Router Installation", projectNumber: "PROJ-001", projectName: "Core Network Upgrade", subInventory: "General Inventory" },
+  { id: "ITEM-10002", name: "Cisco Router 4331", unitPrice: "1100", warehouse: "WH-DENVER-02", taskNumber: "TASK-002", taskName: "Router Configuration", projectNumber: "PROJ-002", projectName: "Data Center Expansion", subInventory: "Critical Spare" },
+  { id: "ITEM-10003", name: "Cisco Catalyst 8300", unitPrice: "2500", warehouse: "WH-TEXAS-01", taskNumber: "TASK-003", taskName: "Switch Installation", projectNumber: "PROJ-003", projectName: "Fiber Backbone Modernization", subInventory: "" },
+  { id: "ITEM-10004", name: "Cisco ISR 1100", unitPrice: "950", warehouse: "WH-TEXAS-02", taskNumber: "TASK-004", taskName: "Switch Configuration", projectNumber: "PROJ-004", projectName: "Network Security Enhancement", subInventory: "" },
+  { id: "ITEM-10005", name: "Cisco Nexus 9000", unitPrice: "4500", warehouse: "WH-NEWYORK-01", taskNumber: "TASK-005", taskName: "Firewall Setup", projectNumber: "PROJ-005", projectName: "Cloud Migration Initiative", subInventory: "" },
+  { id: "ITEM-10006", name: "Dell Latitude 5450", unitPrice: "1400", warehouse: "WH-NEWYORK-02", taskNumber: "TASK-006", taskName: "Firewall Validation", projectNumber: "PROJ-006", projectName: "WAN Optimization Project", subInventory: "" },
+  { id: "ITEM-10007", name: "Dell Precision 3580", unitPrice: "2200", warehouse: "WH-CHICAGO-01", taskNumber: "TASK-007", taskName: "Fiber Cable Deployment", projectNumber: "PROJ-007", projectName: "Router Refresh Program", subInventory: "" },
+  { id: "ITEM-10008", name: "HP EliteBook 840", unitPrice: "1350", warehouse: "WH-CHICAGO-02", taskNumber: "TASK-008", taskName: "Fiber Testing", projectNumber: "PROJ-008", projectName: "Switch Replacement Program", subInventory: "" },
+  { id: "ITEM-10009", name: "Lenovo ThinkPad T14", unitPrice: "1450", warehouse: "WH-ATLANTA-01", taskNumber: "TASK-009", taskName: "Rack Installation", projectNumber: "PROJ-009", projectName: "Disaster Recovery Setup", subInventory: "" },
+  { id: "ITEM-10010", name: "Aruba Switch 6300", unitPrice: "2800", warehouse: "WH-ATLANTA-02", taskNumber: "TASK-010", taskName: "Rack Cabling", projectNumber: "PROJ-010", projectName: "MPLS Network Upgrade", subInventory: "" },
+  { id: "ITEM-10011", name: "Aruba Switch 6200", unitPrice: "2200", warehouse: "WH-PHOENIX-01", taskNumber: "TASK-011", taskName: "Power Setup", projectNumber: "PROJ-011", projectName: "SD-WAN Deployment", subInventory: "" },
+  { id: "ITEM-10012", name: "Juniper MX204", unitPrice: "7500", warehouse: "WH-PHOENIX-02", taskNumber: "TASK-012", taskName: "UPS Installation", projectNumber: "PROJ-012", projectName: "Edge Computing Expansion", subInventory: "" },
+  { id: "ITEM-10013", name: "Juniper EX4300", unitPrice: "3200", warehouse: "WH-DALLAS-01", taskNumber: "TASK-013", taskName: "Server Deployment", projectNumber: "PROJ-013", projectName: "Optical Transport Upgrade", subInventory: "" },
+  { id: "ITEM-10014", name: "Fortinet 100F", unitPrice: "3800", warehouse: "WH-DALLAS-02", taskNumber: "TASK-014", taskName: "Storage Deployment", projectNumber: "PROJ-014", projectName: "Data Center Consolidation", subInventory: "" },
+  { id: "ITEM-10015", name: "Palo Alto PA-440", unitPrice: "4200", warehouse: "WH-SEATTLE-01", taskNumber: "TASK-015", taskName: "Network Assessment", projectNumber: "PROJ-015", projectName: "VoIP Infrastructure Upgrade", subInventory: "" },
+  { id: "ITEM-10016", name: "Fiber Cable 100m", unitPrice: "250", warehouse: "WH-SEATTLE-02", taskNumber: "TASK-016", taskName: "Security Review", projectNumber: "PROJ-016", projectName: "Security Compliance Project", subInventory: "" },
+  { id: "ITEM-10017", name: "Fiber Cable 500m", unitPrice: "950", warehouse: "WH-MIAMI-01", taskNumber: "TASK-017", taskName: "Site Survey", projectNumber: "PROJ-017", projectName: "Firewall Modernization", subInventory: "" },
+  { id: "ITEM-10018", name: "Fiber Patch Panel", unitPrice: "180", warehouse: "WH-MIAMI-02", taskNumber: "TASK-018", taskName: "Equipment Procurement", projectNumber: "PROJ-018", projectName: "Network Automation Program", subInventory: "" },
+  { id: "ITEM-10019", name: "SFP Module 10G", unitPrice: "120", warehouse: "WH-LA-01", taskNumber: "TASK-019", taskName: "Inventory Validation", projectNumber: "PROJ-019", projectName: "Enterprise WiFi Expansion", subInventory: "" },
+  { id: "ITEM-10020", name: "SFP Module 40G", unitPrice: "450", warehouse: "WH-LA-02", taskNumber: "TASK-020", taskName: "Network Migration", projectNumber: "PROJ-020", projectName: "Telecom Infrastructure Refresh", subInventory: "" },
+  { id: "ITEM-10021", name: "Network Rack 42U", unitPrice: "1500", warehouse: "WH-21", taskNumber: "TASK-021", taskName: "WAN Integration", projectNumber: "PROJ-021", projectName: "Fiber Capacity Expansion", subInventory: "" },
+  { id: "ITEM-10022", name: "Network Rack 24U", unitPrice: "900", warehouse: "WH-22", taskNumber: "TASK-022", taskName: "SD-WAN Configuration", projectNumber: "PROJ-022", projectName: "Network Monitoring Upgrade", subInventory: "" },
+  { id: "ITEM-10023", name: "UPS 3KVA", unitPrice: "1800", warehouse: "WH-23", taskNumber: "TASK-023", taskName: "MPLS Testing", projectNumber: "PROJ-023", projectName: "NOC Modernization", subInventory: "" },
+  { id: "ITEM-10024", name: "UPS 5KVA", unitPrice: "2600", warehouse: "WH-24", taskNumber: "TASK-024", taskName: "Cloud Connectivity Setup", projectNumber: "PROJ-024", projectName: "Server Infrastructure Upgrade", subInventory: "" },
+  { id: "ITEM-10025", name: "UPS 10KVA", unitPrice: "4800", warehouse: "WH-25", taskNumber: "TASK-025", taskName: "VPN Configuration", projectNumber: "PROJ-025", projectName: "Storage Expansion Initiative", subInventory: "" },
+  { id: "ITEM-10026", name: "Server Dell R760", unitPrice: "8500", warehouse: "WH-26", taskNumber: "TASK-026", taskName: "Monitoring Tool Setup", projectNumber: "PROJ-026", projectName: "Cloud Security Enhancement", subInventory: "" },
+  { id: "ITEM-10027", name: "Server HPE DL380", unitPrice: "9200", warehouse: "WH-27", taskNumber: "TASK-027", taskName: "Alert Configuration", projectNumber: "PROJ-027", projectName: "Network Segmentation Project", subInventory: "" },
+  { id: "ITEM-10028", name: "SSD 1TB Enterprise", unitPrice: "250", warehouse: "WH-28", taskNumber: "TASK-028", taskName: "Performance Testing", projectNumber: "PROJ-028", projectName: "Access Layer Refresh", subInventory: "" },
+  { id: "ITEM-10029", name: "SSD 2TB Enterprise", unitPrice: "450", warehouse: "WH-29", taskNumber: "TASK-029", taskName: "Disaster Recovery Testing", projectNumber: "PROJ-029", projectName: "Backbone Router Upgrade", subInventory: "" },
+  { id: "ITEM-10030", name: "RAM 32GB ECC", unitPrice: "180", warehouse: "WH-30", taskNumber: "TASK-030", taskName: "Compliance Validation", projectNumber: "PROJ-030", projectName: "Critical Site Redundancy", subInventory: "" },
+  { id: "ITEM-10031", name: "RAM 64GB ECC", unitPrice: "320", warehouse: "WH-31", taskNumber: "TASK-031", taskName: "Documentation Update", projectNumber: "PROJ-031", projectName: "Carrier Network Enhancement", subInventory: "" },
+  { id: "ITEM-10032", name: "Firewall Appliance A", unitPrice: "3500", warehouse: "WH-32", taskNumber: "TASK-032", taskName: "User Acceptance Testing", projectNumber: "PROJ-032", projectName: "Customer Edge Upgrade", subInventory: "" },
+  { id: "ITEM-10033", name: "Firewall Appliance B", unitPrice: "4200", warehouse: "WH-33", taskNumber: "TASK-033", taskName: "Change Management", projectNumber: "PROJ-033", projectName: "Data Analytics Infrastructure", subInventory: "" },
+  { id: "ITEM-10034", name: "Optical Transceiver A", unitPrice: "280", warehouse: "WH-34", taskNumber: "TASK-034", taskName: "Cutover Planning", projectNumber: "PROJ-034", projectName: "Fiber Ring Deployment", subInventory: "" },
+  { id: "ITEM-10035", name: "Optical Transceiver B", unitPrice: "450", warehouse: "WH-35", taskNumber: "TASK-035", taskName: "Production Deployment", projectNumber: "PROJ-035", projectName: "Network Resiliency Program", subInventory: "" },
+  { id: "ITEM-10036", name: "Patch Cord CAT6", unitPrice: "15", warehouse: "WH-36", taskNumber: "TASK-036", taskName: "Post Deployment Validation", projectNumber: "PROJ-036", projectName: "Smart Operations Initiative", subInventory: "" },
+  { id: "ITEM-10037", name: "Patch Cord CAT6A", unitPrice: "25", warehouse: "WH-37", taskNumber: "TASK-037", taskName: "Network Optimization", projectNumber: "PROJ-037", projectName: "IPv6 Migration Program", subInventory: "" },
+  { id: "ITEM-10038", name: "Network Tester Kit", unitPrice: "950", warehouse: "WH-38", taskNumber: "TASK-038", taskName: "Capacity Planning", projectNumber: "PROJ-038", projectName: "Security Operations Center Upgrade", subInventory: "" },
+  { id: "ITEM-10039", name: "Rack PDU", unitPrice: "180", warehouse: "WH-39", taskNumber: "TASK-039", taskName: "Final Audit", projectNumber: "PROJ-039", projectName: "Enterprise Infrastructure Refresh", subInventory: "" },
+  { id: "ITEM-10040", name: "Cable Management Kit", unitPrice: "90", warehouse: "WH-40", taskNumber: "TASK-040", taskName: "Project Closure", projectNumber: "PROJ-040", projectName: "Strategic Technology Modernization", subInventory: "" },
 ];
 
 const samplePurchaseRequests = [
@@ -253,12 +288,22 @@ export default function App() {
     if (field === "item_search") {
       const item = itemMasterData.find(i => i.id === value);
       if (item) {
-        const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice, warehouse: item.warehouse };
+        const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice, warehouse: item.warehouse, taskNumber: item.taskNumber, taskName: item.taskName, projectNumber: item.projectNumber, projectName: item.projectName, subInventory: item.subInventory };
         setPurchaseRequestData(autoFilled);
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
-          addMessage({ type: "card", cardData: { title: "Item Found and Auto-Filled", facts: [{ label: "Item Number", value: item.id }, { label: "Name", value: item.name }, { label: "Price", value: `$${item.unitPrice}` }, { label: "Warehouse", value: item.warehouse }] } });
+          addMessage({ type: "card", cardData: { title: "Item Found and Auto-Filled", facts: [
+            { label: "Item Number", value: item.id },
+            { label: "Item Name", value: item.name },
+            { label: "Price in United States Dollar", value: `$${item.unitPrice}` },
+            { label: "Warehouse Code", value: item.warehouse },
+            { label: "Task Number", value: item.taskNumber },
+            { label: "Task Name", value: item.taskName },
+            { label: "Project Number", value: item.projectNumber },
+            { label: "Project Name", value: item.projectName },
+            { label: "Sub Inventory Value", value: item.subInventory },
+          ].filter(f => f.value) } });
           setTimeout(() => showNextStep(nextStep, steps, autoFilled), 800);
         }, 600);
         setCurrentStep(nextStep);
@@ -279,6 +324,12 @@ export default function App() {
   const showNextStep = (stepIndex: number, steps: any[], data: any) => {
     const step = steps[stepIndex];
     if (!step) { showReview(data); return; }
+    if (["subInventory", "projectNumber", "taskNumber"].includes(step.field) && data[step.field]) {
+      const followingStep = stepIndex + 1;
+      setCurrentStep(followingStep);
+      showNextStep(followingStep, steps, data);
+      return;
+    }
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
@@ -302,7 +353,7 @@ export default function App() {
 
   const handleSearch = (query: string) => {
     setInputValue(query);
-    setSearchResults(query.length > 0 ? itemMasterData.filter(i => i.name.toLowerCase().includes(query.toLowerCase()) || i.id.toLowerCase().includes(query.toLowerCase())) : []);
+    setSearchResults(query.length > 0 ? itemMasterData.filter(i => [i.name, i.id, i.warehouse, i.taskNumber, i.taskName, i.projectNumber, i.projectName].some(value => value.toLowerCase().includes(query.toLowerCase()))) : []);
   };
 
   const submitPurchaseRequest = () => {
@@ -670,6 +721,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
