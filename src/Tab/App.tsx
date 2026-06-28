@@ -116,6 +116,7 @@ export default function App() {
   const C = themePalettes[themeMode];
   const [screen, setScreen] = useState<Screen>("home");
   const [messages, setMessages] = useState<Message[]>([]);
+  const [purchaseRequests, setPurchaseRequests] = useState(samplePurchaseRequests);
   const [purchaseRequestType, setPurchaseRequestType] = useState<PurchaseRequestType>(null);
   const [purchaseRequestData, setPurchaseRequestData] = useState<any>({});
   const [currentStep, setCurrentStep] = useState(0);
@@ -205,7 +206,23 @@ export default function App() {
     setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random() }]);
   };
 
-  const startChat = (type: PurchaseRequestType) => {
+  const getPurchaseRequestSummary = (data: any, type: PurchaseRequestType) => {
+    const quantity = Number(data.quantity || 1);
+    const unitPrice = Number(type === "inventory" ? data.unitPrice : data.price);
+    const amount = Number.isFinite(unitPrice) && unitPrice > 0 ? `$${(unitPrice * quantity).toLocaleString()}` : "Pending";
+    return {
+      item: type === "inventory" ? (data.itemName || "Inventory Purchase Request") : (data.description || "Expense Purchase Request"),
+      amount,
+    };
+  };
+
+  const startChat = (type: PurchaseRequestType, forceNew = false) => {
+    if (!type) return;
+    if (!forceNew && purchaseRequestType === type && messages.length > 0 && !hasSubmitted) {
+      setScreen("chat");
+      return;
+    }
+
     setPurchaseRequestType(type);
     setPurchaseRequestData({});
     setCurrentStep(0);
@@ -292,8 +309,21 @@ export default function App() {
     addMessage({ type: "user", content: "Submit Purchase Request" });
     setIsTyping(true);
     setTimeout(() => {
+      const purchaseRequestNumber = `Purchase Request ${Date.now().toString().slice(-6)}`;
+      const summary = getPurchaseRequestSummary(purchaseRequestData, purchaseRequestType);
+      setPurchaseRequests(prev => [
+        {
+          id: purchaseRequestNumber,
+          type: purchaseRequestType === "inventory" ? "Inventory" : "Expense",
+          item: summary.item,
+          status: "Pending",
+          date: new Date().toISOString().slice(0, 10),
+          amount: summary.amount,
+        },
+        ...prev,
+      ]);
       setIsTyping(false);
-      addMessage({ type: "success", cardData: { purchaseRequestNumber: `Purchase Request ${Date.now().toString().slice(-6)}`, purchaseRequestType } });
+      addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType } });
     }, 1000);
   };
 
@@ -372,7 +402,7 @@ export default function App() {
         <div style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}` }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: C.white }}>Recent Purchase Requests</div>
         </div>
-        {samplePurchaseRequests.map(pr => (
+        {purchaseRequests.map(pr => (
           <div key={pr.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{pr.item}</div>
@@ -381,7 +411,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 12, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
-              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense")} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer", whiteSpace: "nowrap" }}>Re-initiate Purchase Request</button>
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer", whiteSpace: "nowrap" }}>Re-initiate Purchase Request</button>
             </div>
           </div>
         ))}
@@ -532,7 +562,7 @@ export default function App() {
                   </div>
                   <div style={{ padding: "10px 14px", display: "flex", gap: 8, borderTop: `1px solid ${C.border}` }}>
                     <button onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: "pointer" }}>Submit Purchase Request</button>
-                    <button onClick={() => startChat(purchaseRequestType)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
+                    <button onClick={() => startChat(purchaseRequestType, true)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
                   </div>
                 </div>
               </div>
@@ -581,7 +611,7 @@ export default function App() {
     <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
       <div style={{ fontSize: 20, fontWeight: 700, color: C.white, marginBottom: 16 }}>My Purchase Requests</div>
       <div style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
-        {samplePurchaseRequests.map(pr => (
+        {purchaseRequests.map(pr => (
           <div key={pr.id} style={{ padding: "12px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 600, color: C.white }}>{pr.item}</div>
@@ -590,7 +620,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
-              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense")} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Re-initiate Purchase Request</button>
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Re-initiate Purchase Request</button>
             </div>
           </div>
         ))}
@@ -640,6 +670,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
