@@ -141,7 +141,13 @@ export default function App() {
     { id: "approvals", label: "Approvals", icon: "approvals" },
   ];
 
-  const NavIcon = ({ name, color }: { name: "home" | "current" | "requests" | "approvals"; color: string }) => {
+  const bottomActionItems: { label: string; icon: "attach" | "contact" | "help" }[] = [
+    { label: "Attach Documents", icon: "attach" },
+    { label: "Contact Support", icon: "contact" },
+    { label: "Help Center", icon: "help" },
+  ];
+
+  const NavIcon = ({ name, color }: { name: "home" | "current" | "requests" | "approvals" | "attach" | "contact" | "help"; color: string }) => {
     const common = { fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
     if (name === "home") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M3 10.5 12 3l9 7.5" /><path {...common} d="M5 10v10h14V10" /><path {...common} d="M9 20v-6h6v6" /></svg>;
@@ -151,6 +157,15 @@ export default function App() {
     }
     if (name === "current") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M7 3h7l4 4v14H7z" /><path {...common} d="M14 3v5h5" /><path {...common} d="M10 13h5" /><path {...common} d="M10 17h4" /></svg>;
+    }
+    if (name === "attach") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M21 8 10.5 18.5a5 5 0 0 1-7-7L14 1" /><path {...common} d="M17 5 6.5 15.5a2 2 0 0 0 3 3L20 8" /></svg>;
+    }
+    if (name === "contact") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M4 5h16v11H7l-3 3z" /><path {...common} d="M8 9h8" /><path {...common} d="M8 13h5" /></svg>;
+    }
+    if (name === "help") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="9" /><path {...common} d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4" /><path {...common} d="M12 17h.01" /></svg>;
     }
     return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="8" /><path {...common} d="M12 7v5l3 2" /></svg>;
   };
@@ -322,14 +337,19 @@ export default function App() {
           ))}
         </div>
       </nav>
-      {!isSidebarCollapsed && (
-        <div style={{ padding: 10, borderTop: `1px solid ${C.border}` }}>
-          <div style={{ background: C.mid, border: `1px dashed ${C.border}`, borderRadius: 8, padding: "8px 10px", cursor: "pointer" }}>
-            <div style={{ fontSize: 10, color: C.orange, fontWeight: 700, marginBottom: 2 }}>Attach Documents</div>
-            <div style={{ fontSize: 8, color: C.subtle }}>Quotes, invoices, specifications</div>
+      <div style={{ padding: "8px 0 10px", borderTop: `1px solid ${C.border}` }}>
+        {bottomActionItems.map(action => (
+          <div
+            key={action.label}
+            title={isSidebarCollapsed ? action.label : undefined}
+            onClick={() => window.alert(`${action.label} is available from the Purchase Request team.`)}
+            style={{ padding: isSidebarCollapsed ? "10px 0" : "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: 12, color: C.subtle, background: "transparent", borderLeft: "3px solid transparent", transition: "all 0.2s", fontWeight: 400 }}
+          >
+            <NavIcon name={action.icon} color={C.subtle} />
+            {!isSidebarCollapsed && action.label}
           </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
   const HomeScreen = () => (
@@ -620,4 +640,6 @@ export default function App() {
     </div>
   );
 }
+
+
 
