@@ -54,7 +54,7 @@ const themePalettes = {
   },
   light: {
     orange: "#e87722",
-    navy: "#0f2d48",
+    navy: "#ffffff",
     dark: "#f4f7fb",
     mid: "#ffffff",
     card: "#f8fbff",
@@ -670,6 +670,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
