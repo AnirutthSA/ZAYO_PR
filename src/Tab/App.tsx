@@ -303,6 +303,9 @@ export default function App() {
     itemMaster: "Item Number",
     itemName: "Item Name",
     unitPrice: "Price in United States Dollar",
+    itemMasterNumber: "Item Number",
+    item: "Item Name",
+    totalAmount: "Total Cost",
     goodsOrServices: "Goods Or Services",
     description: "Description",
     category: "Category",
@@ -319,7 +322,7 @@ export default function App() {
   } as Record<string, string>)[key] || key.replace(/([A-Z])/g, " $1").replace(/^./, char => char.toUpperCase()).trim();
 
   const formatFieldValue = (key: string, value: any) => {
-    if ((key === "unitPrice" || key === "price") && value) return `$${value}`;
+    if ((key === "unitPrice" || key === "price") && value) return String(value).startsWith("$") ? String(value) : `$${value}`;
     if (key === "subInventory" && value === "general_inventory") return "General";
     if (key === "subInventory" && value === "critical_spare") return "Critical";
     if (key === "category") {
@@ -539,10 +542,10 @@ export default function App() {
       const unitPrice = Number(purchaseRequestType === "inventory" ? newData.unitPrice : newData.price);
       if (Number.isFinite(quantity) && quantity > 0 && Number.isFinite(unitPrice) && unitPrice > 0) {
         const totalCost = quantity * unitPrice;
-        addMessage({ type: "bot", content: `Total cost is $${totalCost.toLocaleString()} based on quantity ${quantity} and unit price $${unitPrice.toLocaleString()}.` });
+        addMessage({ type: "bot", content: `Total cost is $${totalCost.toLocaleString()} based on quantity ${quantity} and unit price $${unitPrice.toLocaleString()}.`, animate: false });
         nextMessageDelay = 900;
       } else if (purchaseRequestType === "expense" && field === "quantity") {
-        addMessage({ type: "bot", content: "Quantity captured. I will calculate the total cost after you enter the unit price." });
+        addMessage({ type: "bot", content: "Quantity captured. I will calculate the total cost after you enter the unit price.", animate: false });
         nextMessageDelay = 700;
       }
     }
@@ -574,6 +577,7 @@ export default function App() {
       showNextStep(stepIndex + 1, steps, data);
       return;
     }
+    setCurrentStep(stepIndex);
     setTimeout(() => {
       if (step.type === "options" || step.type === "acknowledge") {
         const opts = step.type === "acknowledge" ? [{ label: "Yes", value: "yes" }] : step.options;
@@ -608,8 +612,12 @@ export default function App() {
         setTimeout(() => addMessage({ type: "review", cardData: reviewData }), 800);
         return;
       }
+      const quantity = Number(data.quantity || 0);
+      const unitPrice = Number(data.price || 0);
+      const totalAmount = quantity > 0 && unitPrice > 0 ? `$${(quantity * unitPrice).toLocaleString()}` : "Pending";
+      const reviewData = { ...data, totalAmount };
       addMessage({ type: "bot", content: "All done. Here is your Purchase Request summary. Review and submit." });
-      setTimeout(() => addMessage({ type: "review", cardData: data }), 800);
+      setTimeout(() => addMessage({ type: "review", cardData: reviewData }), 800);
     }, 600);
   };
   const handleSearch = (query: string) => {
@@ -678,8 +686,8 @@ export default function App() {
               <NavIcon name={item.icon} color={isActive ? C.orange : C.subtle} />
               {!isSidebarCollapsed && item.label}
             </div>
-          );
-        })}
+            );
+          })}
         <div style={{ padding: isSidebarCollapsed ? "14px 8px 8px" : "16px 14px 8px" }}>
           {!isSidebarCollapsed && <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Request</div>}
           <div title={isSidebarCollapsed ? "Create Purchase Request" : undefined} onClick={() => startInquiry()} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
@@ -785,7 +793,11 @@ export default function App() {
       </div>}
 
       <div ref={messagesScrollRef} style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", overflowAnchor: "none", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {messages.map(msg => (
+        {messages.map((msg, index) => {
+          const latestUserIndex = messages.reduce((latest, message, messageIndex) => message.type === "user" ? messageIndex : latest, -1);
+          const latestInteractiveIndex = messages.reduce((latest, message, messageIndex) => messageIndex > latestUserIndex && ["options", "input", "review"].includes(message.type) ? messageIndex : latest, -1);
+          const isActivePrompt = index === latestInteractiveIndex;
+          return (
           <div key={msg.id}>
             {msg.type === "bot" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
@@ -824,7 +836,7 @@ export default function App() {
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {msg.options?.map(opt => (
-                      <button key={opt.value} onClick={() => msg.field && handleUserInput(opt.value, msg.field, `${opt.label}`)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "7px 14px", fontSize: 12, color: C.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
+                      <button key={opt.value} disabled={!isActivePrompt} onClick={() => isActivePrompt && msg.field && handleUserInput(opt.value, msg.field, `${opt.label}`)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "7px 14px", fontSize: 12, color: C.white, cursor: isActivePrompt ? "pointer" : "default", display: "flex", alignItems: "center", gap: 6, fontWeight: 500, opacity: isActivePrompt ? 1 : 0.45 }}>
                         {opt.label}
                       </button>
                     ))}
@@ -840,11 +852,11 @@ export default function App() {
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   {msg.searchable ? (
                     <div style={{ position: "relative" }}>
-                      <input value={inputValue} onChange={e => handleSearch(e.target.value)} placeholder={msg.placeholder} style={{ width: "100%", background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box" }} />
-                      {searchResults.length > 0 && (
+                      <input value={isActivePrompt ? inputValue : ""} disabled={!isActivePrompt} onChange={e => isActivePrompt && handleSearch(e.target.value)} placeholder={msg.placeholder} style={{ width: "100%", background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box", opacity: isActivePrompt ? 1 : 0.45 }} />
+                      {isActivePrompt && searchResults.length > 0 && (
                         <div style={{ position: "absolute", top: "100%", left: 0, right: 0, background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, zIndex: 10, marginTop: 4 }}>
                           {searchResults.map(item => (
-                            <div key={item.id} onClick={() => handleUserInput(item.id, msg.field!, item.name)} style={{ padding: "10px 12px", cursor: "pointer", borderBottom: `1px solid ${C.border}` }}>
+                            <div key={item.id} onClick={() => isActivePrompt && handleUserInput(item.id, msg.field!, item.name)} style={{ padding: "10px 12px", cursor: isActivePrompt ? "pointer" : "default", borderBottom: `1px solid ${C.border}` }}>
                               <div style={{ fontSize: 12, fontWeight: 600, color: C.white }}>{item.name}</div>
                               <div style={{ fontSize: 10, color: C.subtle }}>{item.id} - ${item.unitPrice} - {item.warehouse}</div>
                             </div>
@@ -853,37 +865,39 @@ export default function App() {
                       )}
                     </div>                  ) : msg.inputType === "select" ? (
                     <div style={{ display: "grid", gap: 8 }}>
-                      <select defaultValue="" onChange={e => e.target.value && msg.field && handleUserInput(e.target.value, msg.field)} style={{ width: "100%", background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none" }}>
+                      <select defaultValue="" disabled={!isActivePrompt} onChange={e => isActivePrompt && e.target.value && msg.field && handleUserInput(e.target.value, msg.field)} style={{ width: "100%", background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", opacity: isActivePrompt ? 1 : 0.45 }}>
                         <option value="" disabled>Select an option</option>
                         {msg.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                       </select>
                       <input
                         placeholder={msg.placeholder}
+                        disabled={!isActivePrompt}
                         onKeyDown={e => {
-                          if (e.key === "Enter") {
+                          if (isActivePrompt && e.key === "Enter") {
                             const val = (e.target as HTMLInputElement).value;
                             if (val && msg.field) { handleUserInput(val, msg.field); (e.target as HTMLInputElement).value = ""; }
                           }
                         }}
-                        style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box" }}
+                        style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box", opacity: isActivePrompt ? 1 : 0.45 }}
                       />
                     </div>                  ) : msg.inputType === "date" ? (
-                    <input type="date" onChange={e => msg.field && handleUserInput(e.target.value, msg.field)} style={{ background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none" }} />
+                    <input type="date" disabled={!isActivePrompt} onChange={e => isActivePrompt && msg.field && handleUserInput(e.target.value, msg.field)} style={{ background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", opacity: isActivePrompt ? 1 : 0.45 }} />
                   ) : (
                     <div style={{ display: "flex", gap: 8 }}>
                       <input
                         type={msg.inputType || "text"}
                         placeholder={msg.placeholder}
                         onKeyDown={e => {
-                          if (e.key === "Enter") {
+                          if (isActivePrompt && e.key === "Enter") {
                             const val = (e.target as HTMLInputElement).value;
                             if (val && msg.field) { handleUserInput(val, msg.field); (e.target as HTMLInputElement).value = ""; }
                           }
                         }}
-                        style={{ flex: 1, background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none" }}
+                        disabled={!isActivePrompt}
+                        style={{ flex: 1, background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", opacity: isActivePrompt ? 1 : 0.45 }}
                       />
                       {msg.content?.includes("optional") && (
-                        <button onClick={() => msg.field && handleUserInput("-", msg.field, "Skip")} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Skip</button>
+                        <button disabled={!isActivePrompt} onClick={() => isActivePrompt && msg.field && handleUserInput("-", msg.field, "Skip")} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 14px", fontSize: 12, color: C.subtle, cursor: isActivePrompt ? "pointer" : "default", opacity: isActivePrompt ? 1 : 0.45 }}>Skip</button>
                       )}
                     </div>
                   )}
@@ -900,15 +914,26 @@ export default function App() {
                     <span style={{ background: C.warn + "22", color: C.warn, fontSize: 10, padding: "2px 8px", borderRadius: 10 }}>Draft</span>
                   </div>
                   <div style={{ padding: "12px 14px" }}>
-                    {Object.entries(msg.cardData).filter(([, v]) => v && v !== "-").map(([key, val]) => (
-                      <div key={key} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
-                        <span style={{ color: C.subtle, textTransform: "capitalize" }}>{key.replace(/([A-Z])/g, " $1").trim()}</span>
-                        <span style={{ color: C.white, fontWeight: 500 }}>{String(val)}</span>
+                    {Object.entries(msg.cardData).filter(([key, value]) => ["item", "description", "quantity", "totalAmount"].includes(key) && value && value !== "-").map(([key, val]) => (
+                      <div key={key} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
+                        <span style={{ color: C.subtle }}>{formatFieldLabel(key)}</span>
+                        <span style={{ color: C.white, fontWeight: 500, textAlign: "right" }}>{formatFieldValue(key, val)}</span>
                       </div>
                     ))}
+                    <details style={{ marginTop: 8 }}>
+                      <summary style={{ color: C.orange, cursor: "pointer", fontSize: 12, fontWeight: 700, listStyle: "none", textDecoration: "underline", textUnderlineOffset: 3 }}>View All Details</summary>
+                      <div style={{ marginTop: 8, borderTop: `1px solid ${C.border}` }}>
+                        {Object.entries(msg.cardData).filter(([, value]) => value && value !== "-").map(([key, val]) => (
+                          <div key={key} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 11 }}>
+                            <span style={{ color: C.subtle }}>{formatFieldLabel(key)}</span>
+                            <span style={{ color: C.white, fontWeight: 500, textAlign: "right" }}>{formatFieldValue(key, val)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                   </div>
                   <div style={{ padding: "10px 14px", display: "flex", gap: 8, borderTop: `1px solid ${C.border}` }}>
-                    <button onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: "pointer" }}>Submit Purchase Request</button>
+                    <button disabled={!isActivePrompt} onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: isActivePrompt ? "pointer" : "default", opacity: isActivePrompt ? 1 : 0.45 }}>Submit Purchase Request</button>
                     <button onClick={() => purchaseRequestType ? startChat(purchaseRequestType, true) : startInquiry(true)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
                   </div>
                 </div>
@@ -950,7 +975,8 @@ export default function App() {
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -1018,6 +1044,16 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
