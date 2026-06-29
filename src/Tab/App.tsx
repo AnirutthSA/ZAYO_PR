@@ -161,29 +161,29 @@ const themePalettes = {
 };
 
 const inventorySteps = [
-  { field: "item_search", type: "search", message: "Let's find the item you need. Search by item name or item number:", placeholder: "Type to search items..." },
-  { field: "shippingToWarehouse", type: "options", message: "Is this request shipping to a warehouse location? Please answer Yes or No.", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
-  { field: "warehouse", type: "select", message: "Please select or provide the warehouse location.", options: warehouseOptions, placeholder: "Type a warehouse location manually" },
-  { field: "shipToLocation", type: "text", message: "Please enter the ship-to location.", placeholder: "e.g. 1800 Larimer Street, Denver" },
-  { field: "quantity", type: "number", message: "Please enter the required quantity.", placeholder: "e.g. 3" },
-  { field: "deliveryDate", type: "date", message: "Please enter the requested delivery date in YYYY-MM-DD format.", placeholder: "" },
-  { field: "subInventory", type: "options", message: "Please enter the sub-inventory type: General or Critical.", options: [{ label: "General", value: "general_inventory" }, { label: "Critical", value: "critical_spare" }] },
-  { field: "coding", type: "text", message: "Please enter the project code and task number, for example PROJ-001 and TASK-001, or type skip.", placeholder: "e.g. PROJ-001 TASK-001" },
-  { field: "acknowledged", type: "acknowledge", message: "Please confirm acknowledgment to continue." },
+  { field: "item_search", label: "Item", type: "search", message: "Let's find the item you need. Search by item name or item number:", placeholder: "Type to search items..." },
+  { field: "shippingToWarehouse", label: "Shipping", type: "options", message: "Is this request shipping to a warehouse location? Please answer Yes or No.", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+  { field: "warehouse", label: "Warehouse", type: "select", message: "Please select or provide the warehouse location.", options: warehouseOptions, placeholder: "Type a warehouse location manually" },
+  { field: "shipToLocation", label: "Ship-To", type: "text", message: "Please enter the ship-to location.", placeholder: "e.g. 1800 Larimer Street, Denver" },
+  { field: "quantity", label: "Quantity", type: "number", message: "Please enter the required quantity.", placeholder: "e.g. 3" },
+  { field: "deliveryDate", label: "Delivery", type: "date", message: "Please enter the requested delivery date in YYYY-MM-DD format.", placeholder: "" },
+  { field: "subInventory", label: "Inventory", type: "options", message: "Please enter the sub-inventory type: General or Critical.", options: [{ label: "General", value: "general_inventory" }, { label: "Critical", value: "critical_spare" }] },
+  { field: "coding", label: "Coding", type: "text", message: "Please enter the project code and task number, for example PROJ-001 and TASK-001, or type skip.", placeholder: "e.g. PROJ-001 TASK-001" },
+  { field: "acknowledged", label: "Confirm", type: "acknowledge", message: "Please confirm acknowledgment to continue." },
 ];
 
 const expenseSteps = [
-  { field: "description", type: "text", message: "Describe what you want to purchase:", placeholder: "e.g. 10 office chairs for new hires" },
-  { field: "goodsOrServices", type: "options", message: "Is this for goods or services?", options: [{ label: "Goods", value: "goods" }, { label: "Services", value: "services" }] },
-  { field: "category", type: "options", message: "Select a category:", options: [{ label: "Information Technology and Technology", value: "it" }, { label: "Office Supplies", value: "office" }, { label: "Maintenance", value: "maintenance" }, { label: "Consulting", value: "consulting" }, { label: "Travel", value: "travel" }, { label: "Other", value: "other" }] },
-  { field: "deliveryDate", type: "date", message: "When do you need it?", placeholder: "" },
-  { field: "approvedSupplier", type: "text", message: "Who is the approved supplier?", placeholder: "e.g. TechCorp Incorporated" },
-  { field: "quantity", type: "number", message: "Quantity needed?", placeholder: "e.g. 10" },
-  { field: "price", type: "number", message: "Unit price ($)?", placeholder: "e.g. 50.00" },
-  { field: "projectNumber", type: "text", message: "Project number? (optional)", placeholder: "e.g. Project 2024-001" },
-  { field: "taskNumber", type: "text", message: "Task number? (optional)", placeholder: "e.g. Task 001" },
-  { field: "emergencyRestoration", type: "options", message: "Emergency restoration request?", options: [{ label: "Yes - Emergency", value: "yes" }, { label: "No - Standard", value: "no" }] },
-  { field: "acknowledged", type: "acknowledge", message: "Almost done. Please acknowledge:" },
+  { field: "description", label: "Details", type: "text", message: "Describe what you want to purchase:", placeholder: "e.g. 10 office chairs for new hires" },
+  { field: "goodsOrServices", label: "Type", type: "options", message: "Is this for goods or services?", options: [{ label: "Goods", value: "goods" }, { label: "Services", value: "services" }] },
+  { field: "category", label: "Category", type: "options", message: "Select a category:", options: [{ label: "Information Technology and Technology", value: "it" }, { label: "Office Supplies", value: "office" }, { label: "Maintenance", value: "maintenance" }, { label: "Consulting", value: "consulting" }, { label: "Travel", value: "travel" }, { label: "Other", value: "other" }] },
+  { field: "deliveryDate", label: "Delivery", type: "date", message: "When do you need it?", placeholder: "" },
+  { field: "approvedSupplier", label: "Supplier", type: "text", message: "Who is the approved supplier?", placeholder: "e.g. TechCorp Incorporated" },
+  { field: "quantity", label: "Quantity", type: "number", message: "Quantity needed?", placeholder: "e.g. 10" },
+  { field: "price", label: "Price", type: "number", message: "Unit price ($)?", placeholder: "e.g. 50.00" },
+  { field: "projectNumber", label: "Project", type: "text", message: "Project number? (optional)", placeholder: "e.g. Project 2024-001" },
+  { field: "taskNumber", label: "Task", type: "text", message: "Task number? (optional)", placeholder: "e.g. Task 001" },
+  { field: "emergencyRestoration", label: "Emergency", type: "options", message: "Emergency restoration request?", options: [{ label: "Yes - Emergency", value: "yes" }, { label: "No - Standard", value: "no" }] },
+  { field: "acknowledged", label: "Confirm", type: "acknowledge", message: "Almost done. Please acknowledge:" },
 ];
 
 
@@ -761,9 +761,9 @@ export default function App() {
         </div>
         <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : purchaseRequestType === "expense" ? "Expense Purchase Request" : "Create Purchase Request"}</div>
       </div>
-      {purchaseRequestType && <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 12px", flexShrink: 0 }}>
+      {purchaseRequestType && <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 16px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
-          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>Purchase Request Progress</span>
+          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request Progress" : "Expense Purchase Request Progress"}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
             <button
@@ -790,6 +790,7 @@ export default function App() {
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: isComplete ? C.good : isCurrent ? C.orange : C.card, border: `2px solid ${isComplete ? C.good : isCurrent ? C.orange : C.border}`, color: isComplete || isCurrent ? "#ffffff" : C.subtle, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 800, boxShadow: `0 4px 10px ${C.shadow}` }}>
                   {isComplete ? "\u2713" : index + 1}
                 </div>
+                <div style={{ color: isCurrent ? C.orange : C.subtle, fontSize: activeSteps.length > 9 ? 8 : 9, fontWeight: isCurrent ? 700 : 600, textAlign: "center", lineHeight: 1.15, maxWidth: 68, whiteSpace: "normal" }}>{step.label}</div>
               </div>
             );
           })}
@@ -811,11 +812,11 @@ export default function App() {
             )}
 
             {msg.type === "user" && (
-              <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <div style={{ background: C.orange, borderRadius: "12px 4px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.white, maxWidth: "70%", lineHeight: 1.6 }}>{msg.content}</div>
+              <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
+                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>You entered: {msg.content}</div>
               </div>
             )}
-
             {msg.type === "card" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "85%" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
@@ -869,7 +870,7 @@ export default function App() {
                       )}
                     </div>                  ) : msg.inputType === "select" ? (
                     <div style={{ display: "grid", gap: 8 }}>
-                      <select defaultValue="" disabled={!isActivePrompt} onChange={e => isActivePrompt && e.target.value && msg.field && handleUserInput(e.target.value, msg.field)} style={{ width: "100%", background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", opacity: isActivePrompt ? 1 : 0.45 }}>
+                      <select defaultValue="" disabled={!isActivePrompt} onChange={e => { if (!isActivePrompt || !e.target.value || !msg.field) return; const selectedLabel = msg.options?.find(option => option.value === e.target.value)?.label || e.target.value; handleUserInput(e.target.value, msg.field, selectedLabel); }} style={{ width: "100%", background: C.card, border: `1px solid ${isActivePrompt ? C.orange : C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", opacity: isActivePrompt ? 1 : 0.45 }}>
                         <option value="" disabled>Select an option</option>
                         {msg.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
                       </select>
@@ -1048,6 +1049,12 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 
