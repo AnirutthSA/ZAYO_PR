@@ -59,7 +59,8 @@ const itemMasterData = [
   { id: "ITEM-10039", name: "Rack PDU", unitPrice: "180", warehouse: "WH-39", taskNumber: "TASK-039", taskName: "Final Audit", projectNumber: "PROJ-039", projectName: "Enterprise Infrastructure Refresh", subInventory: "" },
   { id: "ITEM-10040", name: "Cable Management Kit", unitPrice: "90", warehouse: "WH-40", taskNumber: "TASK-040", taskName: "Project Closure", projectNumber: "PROJ-040", projectName: "Strategic Technology Modernization", subInventory: "" },
 ];
-
+const toOptions = (values: string[]) => Array.from(new Set(values.filter(Boolean))).map(value => ({ label: value, value }));
+const warehouseOptions = toOptions(itemMasterData.map(item => item.warehouse));
 const samplePurchaseRequests = [
   { id: "Purchase Request 2024-001", type: "Inventory", item: "Laptop Dell XPS", status: "Approved", date: "2024-06-01", amount: "$1,200" },
   { id: "Purchase Request 2024-002", type: "Expense", item: "Office Supplies", status: "Pending", date: "2024-06-10", amount: "$450" },
@@ -121,13 +122,14 @@ const themePalettes = {
 
 const inventorySteps = [
   { field: "item_search", type: "search", message: "Let's find the item you need. Search by item name or item number:", placeholder: "Type to search items..." },
-  { field: "purchasingCompany", type: "text", message: "What is the purchasing company?", placeholder: "e.g. ZAYO United States Limited Liability Company" },
-  { field: "quantity", type: "number", message: "How many units do you need?", placeholder: "e.g. 5" },
-  { field: "deliveryDate", type: "date", message: "When do you need it delivered?", placeholder: "" },
-  { field: "subInventory", type: "text", message: "Sub-inventory location? (optional)", placeholder: "e.g. East Sub Inventory 01" },
-  { field: "projectNumber", type: "text", message: "Project number? (optional)", placeholder: "e.g. Project 2024-001" },
-  { field: "taskNumber", type: "text", message: "Task number? (optional)", placeholder: "e.g. Task 001" },
-  { field: "acknowledged", type: "acknowledge", message: "Please acknowledge before submitting:" },
+  { field: "shippingToWarehouse", type: "options", message: "Is this request shipping to a warehouse location? Please answer Yes or No.", options: [{ label: "Yes", value: "yes" }, { label: "No", value: "no" }] },
+  { field: "warehouse", type: "select", message: "Please select or provide the warehouse location.", options: warehouseOptions, placeholder: "Type a warehouse location manually" },
+  { field: "shipToLocation", type: "text", message: "Please enter the ship-to location.", placeholder: "e.g. 1800 Larimer Street, Denver" },
+  { field: "quantity", type: "number", message: "Please enter the required quantity.", placeholder: "e.g. 3" },
+  { field: "deliveryDate", type: "date", message: "Please enter the requested delivery date in YYYY-MM-DD format.", placeholder: "" },
+  { field: "subInventory", type: "options", message: "Please enter the sub-inventory type: General or Critical.", options: [{ label: "General", value: "general_inventory" }, { label: "Critical", value: "critical_spare" }] },
+  { field: "coding", type: "text", message: "Please enter the project code and task number, for example PROJ-001 and TASK-001, or type skip.", placeholder: "e.g. PROJ-001 TASK-001" },
+  { field: "acknowledged", type: "acknowledge", message: "Please confirm acknowledgment to continue." },
 ];
 
 const expenseSteps = [
@@ -315,30 +317,105 @@ export default function App() {
       return;
     }
 
-    const newData = { ...purchaseRequestData, [field]: value };
-    setPurchaseRequestData(newData);
-
     const steps = purchaseRequestType === "inventory" ? inventorySteps : expenseSteps;
     const nextStep = currentStep + 1;
+    const trimmedValue = value.trim();
+
+    const repeatCurrentStep = (message: string) => {
+      addMessage({ type: "bot", content: message });
+      setTimeout(() => showNextStep(currentStep, steps, purchaseRequestData), 350);
+    };
+
+    if (purchaseRequestType === "inventory") {
+      if (field === "quantity" && (!trimmedValue || !Number.isFinite(Number(trimmedValue)) || Number(trimmedValue) <= 0)) {
+        repeatCurrentStep("Please enter a valid quantity greater than 0.");
+        return;
+      }
+
+      if (field === "deliveryDate") {
+        const enteredDate = new Date(`${trimmedValue}T00:00:00`);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue) || Number.isNaN(enteredDate.getTime())) {
+          repeatCurrentStep("Please enter a valid date, for example 2026-07-20.");
+          return;
+        }
+        if (enteredDate <= today) {
+          repeatCurrentStep("Delivery date must be in the future.");
+          return;
+        }
+      }
+
+      if (field === "shipToLocation") {
+        if (!trimmedValue) {
+          repeatCurrentStep("Ship-to location cannot be empty.");
+          return;
+        }
+        if (trimmedValue.length > 120) {
+          repeatCurrentStep("Ship-to location is too long. Please provide a shorter location.");
+          return;
+        }
+      }
+
+      if (field === "coding") {
+        const lowerValue = trimmedValue.toLowerCase();
+        if (lowerValue === "skip") {
+          const skippedData = { ...purchaseRequestData, coding: "Skipped" };
+          setPurchaseRequestData(skippedData);
+          setCurrentStep(nextStep);
+          setInputValue("");
+          setSearchResults([]);
+          if (nextStep >= steps.length) { showReview(skippedData); return; }
+          showNextStep(nextStep, steps, skippedData);
+          return;
+        }
+
+        const projectMatch = trimmedValue.match(/\bPROJ-\d{3}\b/i);
+        const taskMatch = trimmedValue.match(/\bTASK-\d{3}\b/i);
+        if (/project/i.test(trimmedValue) && !projectMatch) {
+          repeatCurrentStep("Invalid project code. Use format PROJ-001.");
+          return;
+        }
+        if (/task/i.test(trimmedValue) && !taskMatch) {
+          repeatCurrentStep("Invalid task number. Use format TASK-001.");
+          return;
+        }
+        if (trimmedValue && !projectMatch && !taskMatch) {
+          repeatCurrentStep("Please enter a valid project code, task number, or type skip.");
+          return;
+        }
+        const codedData = { ...purchaseRequestData, coding: trimmedValue, projectNumber: projectMatch?.[0].toUpperCase(), taskNumber: taskMatch?.[0].toUpperCase() };
+        setPurchaseRequestData(codedData);
+        setCurrentStep(nextStep);
+        setInputValue("");
+        setSearchResults([]);
+        if (nextStep >= steps.length) { showReview(codedData); return; }
+        showNextStep(nextStep, steps, codedData);
+        return;
+      }
+
+      if (field === "acknowledged" && !["yes", "y", "acknowledge", "i acknowledge"].includes(trimmedValue.toLowerCase())) {
+        repeatCurrentStep("Acknowledgment is required. Please type Yes to confirm.");
+        return;
+      }
+    }
+
+    const newData = { ...purchaseRequestData, [field]: value };
+    setPurchaseRequestData(newData);
 
     if (field === "item_search") {
       const item = itemMasterData.find(i => i.id === value);
       if (item) {
-        const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice, warehouse: item.warehouse, taskNumber: item.taskNumber, taskName: item.taskName, projectNumber: item.projectNumber, projectName: item.projectName, subInventory: item.subInventory };
+        const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice };
         setPurchaseRequestData(autoFilled);
         setIsTyping(true);
         setTimeout(() => {
           setIsTyping(false);
+          addMessage({ type: "bot", content: "I found the catalog item and will continue with the Inventory Purchase Request process." });
           addMessage({ type: "card", cardData: { title: "Item Found and Auto-Filled", facts: [
             { label: "Item Number", value: item.id },
             { label: "Item Name", value: item.name },
             { label: "Price in United States Dollar", value: `$${item.unitPrice}` },
-            { label: "Warehouse Code", value: item.warehouse },
-            { label: "Task Number", value: item.taskNumber },
-            { label: "Task Name", value: item.taskName },
-            { label: "Project Number", value: item.projectNumber },
-            { label: "Project Name", value: item.projectName },
-            { label: "Sub Inventory Value", value: item.subInventory },
           ].filter(f => f.value) } });
           setTimeout(() => showNextStep(nextStep, steps, autoFilled), 800);
         }, 600);
@@ -349,6 +426,10 @@ export default function App() {
       }
     }
 
+    if (purchaseRequestType === "inventory" && ["warehouse", "shipToLocation"].includes(field)) {
+      addMessage({ type: "bot", content: "The inventory request is set up with the item master information and shipping location. I will now collect the remaining required details." });
+    }
+
     setCurrentStep(nextStep);
     setInputValue("");
     setSearchResults([]);
@@ -356,37 +437,59 @@ export default function App() {
     if (nextStep >= steps.length) { showReview(newData); return; }
     showNextStep(nextStep, steps, newData);
   };
-
   const showNextStep = (stepIndex: number, steps: any[], data: any) => {
     const step = steps[stepIndex];
     if (!step) { showReview(data); return; }
-    if (["subInventory", "projectNumber", "taskNumber"].includes(step.field) && data[step.field]) {
-      const followingStep = stepIndex + 1;
-      setCurrentStep(followingStep);
-      showNextStep(followingStep, steps, data);
+    if (purchaseRequestType === "inventory" && step.field === "warehouse" && data.shippingToWarehouse !== "yes") {
+      showNextStep(stepIndex + 1, steps, data);
+      return;
+    }
+    if (purchaseRequestType === "inventory" && step.field === "shipToLocation" && data.shippingToWarehouse !== "no") {
+      showNextStep(stepIndex + 1, steps, data);
       return;
     }
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
       if (step.type === "options" || step.type === "acknowledge") {
-        const opts = step.type === "acknowledge" ? [{ label: "I Acknowledge and Confirm", value: "yes" }] : step.options;
+        const opts = step.type === "acknowledge" ? [{ label: "Yes", value: "yes" }] : step.options;
         addMessage({ type: "options", content: step.message, field: step.field, options: opts });
       } else {
-        addMessage({ type: "input", content: step.message, field: step.field, inputType: step.type, placeholder: step.placeholder, searchable: step.type === "search" });
+        addMessage({ type: "input", content: step.message, field: step.field, options: step.options, inputType: step.type, placeholder: step.placeholder, searchable: step.type === "search" });
       }
     }, 600);
   };
-
   const showReview = (data: any) => {
     setIsTyping(true);
     setTimeout(() => {
       setIsTyping(false);
+      if (purchaseRequestType === "inventory") {
+        const quantity = Number(data.quantity || 0);
+        const unitPrice = Number(data.unitPrice || 0);
+        const totalAmount = quantity > 0 && unitPrice > 0 ? `$${(quantity * unitPrice).toLocaleString()}` : "Pending";
+        const reviewData = {
+          itemMasterNumber: data.itemMaster,
+          item: data.itemName,
+          quantity: data.quantity,
+          unitPrice: data.unitPrice ? `$${data.unitPrice}` : undefined,
+          totalAmount,
+          deliveryDate: data.deliveryDate,
+          shippingToWarehouse: data.shippingToWarehouse === "yes" ? "Yes" : "No",
+          warehouse: data.warehouse,
+          shipToLocation: data.shipToLocation,
+          subInventory: data.subInventory === "general_inventory" ? "General" : data.subInventory === "critical_spare" ? "Critical" : data.subInventory,
+          projectNumber: data.projectNumber,
+          taskNumber: data.taskNumber,
+          acknowledgment: data.acknowledged ? "Confirmed" : undefined,
+        };
+        addMessage({ type: "bot", content: "The inventory Purchase Request draft is ready. You can submit it, or start over to edit the captured details." });
+        setTimeout(() => addMessage({ type: "review", cardData: reviewData }), 800);
+        return;
+      }
       addMessage({ type: "bot", content: "All done. Here is your Purchase Request summary. Review and submit." });
       setTimeout(() => addMessage({ type: "review", cardData: data }), 800);
     }, 600);
   };
-
   const handleSearch = (query: string) => {
     setInputValue(query);
     setSearchResults(query.length > 0 ? itemMasterData.filter(i => [i.name, i.id, i.warehouse, i.taskNumber, i.taskName, i.projectNumber, i.projectName].some(value => value.toLowerCase().includes(query.toLowerCase()))) : []);
@@ -394,6 +497,19 @@ export default function App() {
 
   const submitPurchaseRequest = () => {
     addMessage({ type: "user", content: "Submit Purchase Request" });
+    if (purchaseRequestType === "inventory") {
+      const missingFields = [];
+      if (!purchaseRequestData.quantity) missingFields.push("quantity");
+      if (!purchaseRequestData.deliveryDate) missingFields.push("delivery date");
+      if (!purchaseRequestData.subInventory) missingFields.push("sub-inventory");
+      if (!purchaseRequestData.acknowledged) missingFields.push("acknowledgment");
+      if (purchaseRequestData.shippingToWarehouse === "yes" && !purchaseRequestData.warehouse) missingFields.push("warehouse location");
+      if (purchaseRequestData.shippingToWarehouse === "no" && !purchaseRequestData.shipToLocation) missingFields.push("ship-to location");
+      if (missingFields.length > 0) {
+        addMessage({ type: "bot", content: `Missing required fields: ${missingFields.join(", ")}. Please complete the review details.` });
+        return;
+      }
+    }
     setIsTyping(true);
     setTimeout(() => {
       const purchaseRequestNumber = `Purchase Request ${Date.now().toString().slice(-6)}`;
@@ -413,7 +529,6 @@ export default function App() {
       addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType } });
     }, 1000);
   };
-
   const Sidebar = () => (
     <div style={{ width: isSidebarCollapsed ? 68 : 190, background: C.navy, borderRight: `1px solid ${C.border}`, display: "flex", flexDirection: "column", flexShrink: 0, transition: "width 0.2s ease" }}>
       <div style={{ padding: isSidebarCollapsed ? "12px 10px" : "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
@@ -603,8 +718,23 @@ export default function App() {
                           ))}
                         </div>
                       )}
-                    </div>
-                  ) : msg.inputType === "date" ? (
+                    </div>                  ) : msg.inputType === "select" ? (
+                    <div style={{ display: "grid", gap: 8 }}>
+                      <select defaultValue="" onChange={e => e.target.value && msg.field && handleUserInput(e.target.value, msg.field)} style={{ width: "100%", background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none" }}>
+                        <option value="" disabled>Select an option</option>
+                        {msg.options?.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      </select>
+                      <input
+                        placeholder={msg.placeholder}
+                        onKeyDown={e => {
+                          if (e.key === "Enter") {
+                            const val = (e.target as HTMLInputElement).value;
+                            if (val && msg.field) { handleUserInput(val, msg.field); (e.target as HTMLInputElement).value = ""; }
+                          }
+                        }}
+                        style={{ width: "100%", background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box" }}
+                      />
+                    </div>                  ) : msg.inputType === "date" ? (
                     <input type="date" onChange={e => msg.field && handleUserInput(e.target.value, msg.field)} style={{ background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none" }} />
                   ) : (
                     <div style={{ display: "flex", gap: 8 }}>
@@ -754,6 +884,14 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
 
 
 
