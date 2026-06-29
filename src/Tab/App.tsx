@@ -160,7 +160,6 @@ export default function App() {
   const [inputValue, setInputValue] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
 
   const themeOptions: { mode: ThemeMode; label: string }[] = [
@@ -241,8 +240,13 @@ export default function App() {
   useEffect(() => {
     const messageContainer = messagesScrollRef.current;
     if (!messageContainer) return;
-    messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: "smooth" });
-  }, [messages, isTyping]);
+
+    const frame = requestAnimationFrame(() => {
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, [messages.length]);
 
   const addMessage = (msg: Omit<Message, "id">) => {
     setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random() }]);
@@ -656,7 +660,7 @@ export default function App() {
         </div>
       </div>}
 
-      <div ref={messagesScrollRef} style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div ref={messagesScrollRef} style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", overflowAnchor: "none", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.map(msg => (
           <div key={msg.id}>
             {msg.type === "bot" && (
@@ -821,7 +825,6 @@ export default function App() {
             </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
     </div>
   );
@@ -889,6 +892,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
