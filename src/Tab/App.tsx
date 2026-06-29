@@ -15,6 +15,7 @@ interface Message {
   placeholder?: string;
   cardData?: any;
   searchable?: boolean;
+  animate?: boolean;
 }
 
 const itemMasterData = [
@@ -61,6 +62,45 @@ const itemMasterData = [
 ];
 const toOptions = (values: string[]) => Array.from(new Set(values.filter(Boolean))).map(value => ({ label: value, value }));
 const warehouseOptions = toOptions(itemMasterData.map(item => item.warehouse));
+
+const TypewriterText = ({ text = "", animate, onTick, onDone }: { text?: string; animate?: boolean; onTick?: () => void; onDone?: () => void }) => {
+  const [visibleText, setVisibleText] = useState(animate ? "" : text);
+
+  useEffect(() => {
+    if (!animate) {
+      setVisibleText(text);
+      return;
+    }
+
+    let index = 0;
+    let cancelled = false;
+    setVisibleText("");
+
+    const interval = window.setInterval(() => {
+      if (cancelled) return;
+      index += 1;
+      setVisibleText(text.slice(0, index));
+      onTick?.();
+
+      if (index >= text.length) {
+        window.clearInterval(interval);
+        onDone?.();
+      }
+    }, 18);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [text, animate]);
+
+  return (
+    <>
+      {visibleText}
+      {animate && visibleText.length < text.length && <span style={{ opacity: 0.65 }}> |</span>}
+    </>
+  );
+};
 const samplePurchaseRequests = [
   { id: "Purchase Request 2024-001", type: "Inventory", item: "Laptop Dell XPS", status: "Approved", date: "2024-06-01", amount: "$1,200" },
   { id: "Purchase Request 2024-002", type: "Expense", item: "Office Supplies", status: "Pending", date: "2024-06-10", amount: "$450" },
@@ -248,8 +288,63 @@ export default function App() {
     return () => cancelAnimationFrame(frame);
   }, [messages.length]);
 
+  const keepMessagesAtBottom = () => {
+    const messageContainer = messagesScrollRef.current;
+    if (!messageContainer) return;
+    requestAnimationFrame(() => {
+      messageContainer.scrollTop = messageContainer.scrollHeight;
+    });
+  };
+
+  const markMessageTyped = (id: string) => {
+    setMessages(prev => prev.map(msg => msg.id === id ? { ...msg, animate: false } : msg));
+  };
+
+  const formatFieldLabel = (key: string) => ({
+    itemMaster: "Item Number",
+    itemName: "Item Name",
+    unitPrice: "Price in United States Dollar",
+    goodsOrServices: "Goods Or Services",
+    description: "Description",
+    category: "Category",
+    price: "Price in United States Dollar",
+    deliveryDate: "Delivery Date",
+    approvedSupplier: "Approved Supplier",
+    projectNumber: "Project Number",
+    taskNumber: "Task Number",
+    emergencyRestoration: "Emergency Restoration",
+    shippingToWarehouse: "Shipping To Warehouse",
+    shipToLocation: "Ship-To Location",
+    subInventory: "Sub Inventory",
+    acknowledged: "Acknowledgment",
+  } as Record<string, string>)[key] || key.replace(/([A-Z])/g, " $1").replace(/^./, char => char.toUpperCase()).trim();
+
+  const formatFieldValue = (key: string, value: any) => {
+    if ((key === "unitPrice" || key === "price") && value) return `$${value}`;
+    if (key === "subInventory" && value === "general_inventory") return "General";
+    if (key === "subInventory" && value === "critical_spare") return "Critical";
+    if (key === "category") {
+      const categoryLabels: Record<string, string> = {
+        it: "Information Technology and Technology",
+        office: "Office Supplies",
+        maintenance: "Maintenance",
+        consulting: "Consulting",
+        travel: "Travel",
+        other: "Other",
+      };
+      return categoryLabels[String(value)] || String(value);
+    }
+    if (key === "emergencyRestoration") return value === "yes" ? "Yes - Emergency" : "No - Standard";
+    if (key === "goodsOrServices") return value === "goods" ? "Goods" : "Services";
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (value === "yes") return "Yes";
+    if (value === "no") return "No";
+    return String(value);
+  };
+
   const addMessage = (msg: Omit<Message, "id">) => {
-    setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random() }]);
+    const shouldAnimate = ["bot", "options", "input"].includes(msg.type);
+    setMessages(prev => [...prev, { ...msg, animate: msg.animate ?? shouldAnimate, id: Date.now().toString() + Math.random() }]);
   };
 
   const getPurchaseRequestSummary = (data: any, type: PurchaseRequestType) => {
@@ -435,16 +530,41 @@ export default function App() {
       }
     }
 
+    let nextMessageDelay = 0;
+
     if (purchaseRequestType === "inventory" && ["warehouse", "shipToLocation"].includes(field)) {
       addMessage({ type: "bot", content: "The inventory request is set up with the item master information and shipping location. I will now collect the remaining required details." });
+      nextMessageDelay = 650;
+    }
+
+    if (["quantity", "price"].includes(field)) {
+      const quantity = Number(newData.quantity);
+      const unitPrice = Number(purchaseRequestType === "inventory" ? newData.unitPrice : newData.price);
+      if (Number.isFinite(quantity) && quantity > 0 && Number.isFinite(unitPrice) && unitPrice > 0) {
+        const totalCost = quantity * unitPrice;
+        addMessage({ type: "bot", content: `Total cost is $${totalCost.toLocaleString()} based on quantity ${quantity} and unit price $${unitPrice.toLocaleString()}.` });
+        nextMessageDelay = 900;
+      } else if (purchaseRequestType === "expense" && field === "quantity") {
+        addMessage({ type: "bot", content: "Quantity captured. I will calculate the total cost after you enter the unit price." });
+        nextMessageDelay = 700;
+      }
     }
 
     setCurrentStep(nextStep);
     setInputValue("");
     setSearchResults([]);
 
-    if (nextStep >= steps.length) { showReview(newData); return; }
-    showNextStep(nextStep, steps, newData);
+    const continueFlow = () => {
+      if (nextStep >= steps.length) { showReview(newData); return; }
+      showNextStep(nextStep, steps, newData);
+    };
+
+    if (nextMessageDelay > 0) {
+      setTimeout(continueFlow, nextMessageDelay);
+      return;
+    }
+
+    continueFlow();
   };
   const showNextStep = (stepIndex: number, steps: any[], data: any) => {
     const step = steps[stepIndex];
@@ -535,7 +655,7 @@ export default function App() {
         ...prev,
       ]);
       setIsTyping(false);
-      addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType } });
+      addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType: purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request", submittedFields: purchaseRequestData } });
     }, 1000);
   };
   const Sidebar = () => (
@@ -666,7 +786,7 @@ export default function App() {
             {msg.type === "bot" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
-                <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{msg.content}</div>
+                <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
               </div>
             )}
 
@@ -697,7 +817,7 @@ export default function App() {
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
+                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {msg.options?.map(opt => (
                       <button key={opt.value} onClick={() => msg.field && handleUserInput(opt.value, msg.field, `${opt.label}`)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "7px 14px", fontSize: 12, color: C.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
@@ -713,7 +833,7 @@ export default function App() {
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
+                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
                   {msg.searchable ? (
                     <div style={{ position: "relative" }}>
                       <input value={inputValue} onChange={e => handleSearch(e.target.value)} placeholder={msg.placeholder} style={{ width: "100%", background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box" }} />
@@ -794,21 +914,32 @@ export default function App() {
             {msg.type === "success" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
-                <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", maxWidth: "85%" }}>
-                  <div style={{ background: C.good + "22", padding: "14px", textAlign: "center" }}>
-                    <div style={{ fontSize: 32, marginBottom: 4 }}>Z</div>
+                <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", maxWidth: "85%", width: "min(100%, 520px)" }}>
+                  <div style={{ background: C.good + "22", padding: "16px 14px", textAlign: "center" }}>
+                    <div style={{ width: 44, height: 44, background: C.orange, borderRadius: 9, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#ffffff", fontWeight: 900, fontStyle: "italic", marginBottom: 8 }}>Z</div>
                     <div style={{ fontSize: 16, fontWeight: 700, color: C.good }}>Purchase Request Submitted Successfully!</div>
                   </div>
                   <div style={{ padding: 14 }}>
-                    {[{ label: "Purchase Request Number", value: msg.cardData.purchaseRequestNumber }, { label: "Status", value: "Pending Approval" }, { label: "Submitted", value: new Date().toLocaleDateString() }].map(f => (
-                      <div key={f.label} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
+                    {[{ label: "Purchase Request Number", value: msg.cardData.purchaseRequestNumber }, { label: "Purchase Request Type", value: msg.cardData.purchaseRequestType }, { label: "Status", value: "Pending Approval" }, { label: "Submitted", value: new Date().toLocaleDateString() }].map(f => (
+                      <div key={f.label} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "6px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
                         <span style={{ color: C.subtle }}>{f.label}</span>
-                        <span style={{ color: C.white, fontWeight: 600 }}>{f.value}</span>
+                        <span style={{ color: C.white, fontWeight: 600, textAlign: "right" }}>{f.value}</span>
                       </div>
                     ))}
+                    <details style={{ marginTop: 10, border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden" }}>
+                      <summary style={{ padding: "9px 12px", color: C.orange, cursor: "pointer", fontSize: 12, fontWeight: 700, background: C.mid }}>View All Fields</summary>
+                      <div style={{ padding: "8px 12px" }}>
+                        {Object.entries(msg.cardData.submittedFields || {}).filter(([, value]) => value && value !== "-").map(([key, value]) => (
+                          <div key={key} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "5px 0", borderBottom: `1px solid ${C.border}`, fontSize: 11 }}>
+                            <span style={{ color: C.subtle }}>{formatFieldLabel(key)}</span>
+                            <span style={{ color: C.white, fontWeight: 600, textAlign: "right" }}>{formatFieldValue(key, value)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </details>
                     <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                       <button onClick={() => setScreen("my-purchase-requests")} style={{ flex: 1, background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer" }}>View My Purchase Requests</button>
-                      <button onClick={() => startInquiry(true)} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer", fontWeight: 600 }}>New Purchase Request</button>
+                      <button onClick={() => startInquiry(true)} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: "#ffffff", cursor: "pointer", fontWeight: 600 }}>New Purchase Request</button>
                     </div>
                   </div>
                 </div>
@@ -892,6 +1023,17 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+
+
+
 
 
 
