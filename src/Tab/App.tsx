@@ -218,13 +218,14 @@ export default function App() {
     { id: "approvals", label: "Approvals", icon: "approvals" },
   ];
 
-  const bottomActionItems: { label: string; icon: "attach" | "contact" | "help" }[] = [
+  const bottomActionItems: { label: string; icon: "attach" | "contact" | "help" | "reset" }[] = [
     { label: "Attach Documents", icon: "attach" },
     { label: "Contact Support", icon: "contact" },
     { label: "Help Center", icon: "help" },
+    { label: "Reset Proof of Concept", icon: "reset" },
   ];
 
-  const NavIcon = ({ name, color }: { name: "home" | "current" | "requests" | "approvals" | "attach" | "contact" | "help"; color: string }) => {
+  const NavIcon = ({ name, color }: { name: "home" | "current" | "requests" | "approvals" | "attach" | "contact" | "help" | "reset"; color: string }) => {
     const common = { fill: "none", stroke: color, strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
     if (name === "home") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M3 10.5 12 3l9 7.5" /><path {...common} d="M5 10v10h14V10" /><path {...common} d="M9 20v-6h6v6" /></svg>;
@@ -243,6 +244,9 @@ export default function App() {
     }
     if (name === "help") {
       return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="9" /><path {...common} d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4" /><path {...common} d="M12 17h.01" /></svg>;
+    }
+    if (name === "reset") {
+      return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path {...common} d="M20 11a8 8 0 1 0-2.34 5.66" /><path {...common} d="M20 4v7h-7" /></svg>;
     }
     return <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><circle {...common} cx="12" cy="12" r="8" /><path {...common} d="M12 7v5l3 2" /></svg>;
   };
@@ -701,7 +705,7 @@ export default function App() {
           <div
             key={action.label}
             title={isSidebarCollapsed ? action.label : undefined}
-            onClick={() => window.alert(`${action.label} is available from the Purchase Request team.`)}
+            onClick={() => action.icon === "reset" ? window.location.reload() : window.alert(`${action.label} is available from the Purchase Request team.`)}
             style={{ padding: isSidebarCollapsed ? "10px 0" : "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: 12, color: C.subtle, background: "transparent", borderLeft: "3px solid transparent", transition: "all 0.2s", fontWeight: 400 }}
           >
             <NavIcon name={action.icon} color={C.subtle} />
@@ -1044,6 +1048,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
