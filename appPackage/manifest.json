@@ -14,12 +14,12 @@
     "outline": "outline.png"
   },
   "name": {
-    "short": "Purchase Request Assistant",
-    "full": "Purchase Request Assistant"
+    "short": "Purchase Requisition",
+    "full": "Purchase Requisition"
   },
   "description": {
-    "short": "Purchase Request Assistant",
-    "full": "Purchase Request Assistant"
+    "short": "Purchase Requisition",
+    "full": "Purchase Requisition"
   },
   "accentColor": "#e87722",
   "bots": [],
@@ -27,7 +27,7 @@
   "staticTabs": [
     {
       "entityId": "index0",
-      "name": "ZAYO Purchase Request Assistant",
+      "name": "ZAYO Purchase Requisition",
       "contentUrl": "https://zayo-pr.vercel.app",
       "websiteUrl": "https://zayo-pr.vercel.app",
       "scopes": [

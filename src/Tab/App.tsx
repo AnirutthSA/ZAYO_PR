@@ -102,14 +102,14 @@ const TypewriterText = ({ text = "", animate, onTick, onDone }: { text?: string;
   );
 };
 const samplePurchaseRequests = [
-  { id: "Purchase Request 2024-001", type: "Inventory", item: "Laptop Dell XPS", status: "Approved", date: "2024-06-01", amount: "$1,200" },
-  { id: "Purchase Request 2024-002", type: "Expense", item: "Office Supplies", status: "Pending", date: "2024-06-10", amount: "$450" },
-  { id: "Purchase Request 2024-003", type: "Inventory", item: "Network Switch", status: "Rejected", date: "2024-06-15", amount: "$800" },
+  { id: "Purchase Requisition 2024-001", type: "Inventory", item: "Laptop Dell XPS", status: "Approved", date: "2024-06-01", amount: "$1,200" },
+  { id: "Purchase Requisition 2024-002", type: "Expense", item: "Office Supplies", status: "Pending", date: "2024-06-10", amount: "$450" },
+  { id: "Purchase Requisition 2024-003", type: "Inventory", item: "Network Switch", status: "Rejected", date: "2024-06-15", amount: "$800" },
 ];
 
 const pendingApprovals = [
-  { id: "Purchase Request 2024-004", requestedBy: "John Smith", type: "Inventory", item: "Server Rack", amount: "$3,500", date: "2024-06-20" },
-  { id: "Purchase Request 2024-005", requestedBy: "Sarah Lee", type: "Expense", item: "Training Materials", amount: "$250", date: "2024-06-22" },
+  { id: "Purchase Requisition 2024-004", requestedBy: "John Smith", type: "Inventory", item: "Server Rack", amount: "$3,500", date: "2024-06-20" },
+  { id: "Purchase Requisition 2024-005", requestedBy: "Sarah Lee", type: "Expense", item: "Training Materials", amount: "$250", date: "2024-06-22" },
 ];
 
 const themePalettes = {
@@ -213,8 +213,8 @@ export default function App() {
   const progressPercent = purchaseRequestType ? Math.round((progressStep / activeSteps.length) * 100) : 0;
   const navigationItems: { id: Screen; label: string; icon: "home" | "current" | "requests" | "approvals" }[] = [
     { id: "home", label: "Home", icon: "home" },
-    ...(purchaseRequestType ? [{ id: "chat" as const, label: "Current Purchase Request", icon: "current" as const }] : []),
-    { id: "my-purchase-requests", label: "My Purchase Requests", icon: "requests" },
+    ...(purchaseRequestType ? [{ id: "chat" as const, label: "Current Purchase Requisition", icon: "current" as const }] : []),
+    { id: "my-purchase-requests", label: "My Purchase Requisitions", icon: "requests" },
     { id: "approvals", label: "Approvals", icon: "approvals" },
   ];
 
@@ -358,7 +358,7 @@ export default function App() {
     const unitPrice = Number(type === "inventory" ? data.unitPrice : data.price);
     const amount = Number.isFinite(unitPrice) && unitPrice > 0 ? `$${(unitPrice * quantity).toLocaleString()}` : "Pending";
     return {
-      item: type === "inventory" ? (data.itemName || "Inventory Purchase Request") : (data.description || "Expense Purchase Request"),
+      item: type === "inventory" ? (data.itemName || "Inventory Purchase Requisition") : (data.description || "Expense Purchase Requisition"),
       amount,
     };
   };
@@ -378,7 +378,7 @@ export default function App() {
     setScreen("chat");
 
     setTimeout(() => {
-      addMessage({ type: "bot", content: "Welcome. I can help you create a Purchase Request." });
+      addMessage({ type: "bot", content: "Welcome. I can help you create a Purchase Requisition." });
     }, 300);
 
     setTimeout(() => {
@@ -410,7 +410,7 @@ export default function App() {
     setScreen("chat");
 
     setTimeout(() => {
-      addMessage({ type: "bot", content: `Let's create your ${type === "inventory" ? "Inventory" : "Expense"} Purchase Request.\n\nI'll guide you step by step.` });
+      addMessage({ type: "bot", content: `Let's create your ${type === "inventory" ? "Inventory" : "Expense"} Purchase Requisition.\n\nI'll guide you step by step.` });
     }, 300);
 
     setTimeout(() => {
@@ -519,7 +519,7 @@ export default function App() {
         const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice };
         setPurchaseRequestData(autoFilled);
         setTimeout(() => {
-          addMessage({ type: "bot", content: "I found the catalog item and will continue with the Inventory Purchase Request process." });
+          addMessage({ type: "bot", content: "I found the catalog item and will continue with the Inventory Purchase Requisition process." });
           addMessage({ type: "card", cardData: { title: "Item Found and Auto-Filled", facts: [
             { label: "Item Number", value: item.id },
             { label: "Item Name", value: item.name },
@@ -612,7 +612,7 @@ export default function App() {
           taskNumber: data.taskNumber,
           acknowledgment: data.acknowledged ? "Confirmed" : undefined,
         };
-        addMessage({ type: "bot", content: "The inventory Purchase Request draft is ready. You can submit it, or start over to edit the captured details." });
+        addMessage({ type: "bot", content: "The inventory Purchase Requisition draft is ready. You can submit it, or start over to edit the captured details." });
         setTimeout(() => addMessage({ type: "review", cardData: reviewData }), 800);
         return;
       }
@@ -620,7 +620,7 @@ export default function App() {
       const unitPrice = Number(data.price || 0);
       const totalAmount = quantity > 0 && unitPrice > 0 ? `$${(quantity * unitPrice).toLocaleString()}` : "Pending";
       const reviewData = { ...data, totalAmount };
-      addMessage({ type: "bot", content: "All done. Here is your Purchase Request summary. Review and submit." });
+      addMessage({ type: "bot", content: "All done. Here is your Purchase Requisition summary. Review and submit." });
       setTimeout(() => addMessage({ type: "review", cardData: reviewData }), 800);
     }, 600);
   };
@@ -630,7 +630,7 @@ export default function App() {
   };
 
   const submitPurchaseRequest = () => {
-    addMessage({ type: "user", content: "Submit Purchase Request" });
+    addMessage({ type: "user", content: "Submit Purchase Requisition" });
     if (purchaseRequestType === "inventory") {
       const missingFields = [];
       if (!purchaseRequestData.quantity) missingFields.push("quantity");
@@ -645,7 +645,7 @@ export default function App() {
       }
     }
     setTimeout(() => {
-      const purchaseRequestNumber = `Purchase Request ${Date.now().toString().slice(-6)}`;
+      const purchaseRequestNumber = `Purchase Requisition ${Date.now().toString().slice(-6)}`;
       const summary = getPurchaseRequestSummary(purchaseRequestData, purchaseRequestType);
       setPurchaseRequests(prev => [
         {
@@ -658,7 +658,7 @@ export default function App() {
         },
         ...prev,
       ]);
-      addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType: purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request", submittedFields: purchaseRequestData } });
+      addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType: purchaseRequestType === "inventory" ? "Inventory Purchase Requisition" : "Expense Purchase Requisition", submittedFields: purchaseRequestData } });
     }, 1000);
   };
   const Sidebar = () => (
@@ -669,8 +669,8 @@ export default function App() {
             <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", flexShrink: 0 }}>Z</div>
             {!isSidebarCollapsed && (
               <div style={{ minWidth: 0 }}>
-                <div style={{ color: C.white, fontWeight: 700, fontSize: 12, whiteSpace: "nowrap" }}>ZAYO Purchase Request</div>
-                <div style={{ color: C.subtle, fontSize: 9 }}>Purchase Assistant</div>
+                <div style={{ color: C.white, fontWeight: 700, fontSize: 12, whiteSpace: "nowrap" }}>ZAYO Purchase Requisition</div>
+                <div style={{ color: C.subtle, fontSize: 9 }}>Purchase Requisition</div>
               </div>
             )}
           </div>
@@ -693,10 +693,10 @@ export default function App() {
             );
           })}
         <div style={{ padding: isSidebarCollapsed ? "14px 8px 8px" : "16px 14px 8px" }}>
-          {!isSidebarCollapsed && <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Request</div>}
-          <div title={isSidebarCollapsed ? "Create Purchase Request" : undefined} onClick={() => startInquiry()} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
+          {!isSidebarCollapsed && <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Requisition</div>}
+          <div title={isSidebarCollapsed ? "Create Purchase Requisition" : undefined} onClick={() => startInquiry()} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
             <NavIcon name="current" color={C.subtle} />
-            {!isSidebarCollapsed && "Create Purchase Request"}
+            {!isSidebarCollapsed && "Create Purchase Requisition"}
           </div>
         </div>
       </nav>
@@ -705,7 +705,7 @@ export default function App() {
           <div
             key={action.label}
             title={isSidebarCollapsed ? action.label : undefined}
-            onClick={() => action.icon === "reset" ? window.location.reload() : window.alert(`${action.label} is available from the Purchase Request team.`)}
+            onClick={() => action.icon === "reset" ? window.location.reload() : window.alert(`${action.label} is available from the Purchase Requisition team.`)}
             style={{ padding: isSidebarCollapsed ? "10px 0" : "9px 14px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: 12, color: C.subtle, background: "transparent", borderLeft: "3px solid transparent", transition: "all 0.2s", fontWeight: 400 }}
           >
             <NavIcon name={action.icon} color={C.subtle} />
@@ -719,19 +719,19 @@ export default function App() {
     <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
       <div style={{ marginBottom: 24 }}>
         <div style={{ fontSize: 10, color: C.orange, fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 6 }}>Welcome</div>
-        <div style={{ fontSize: 22, fontWeight: 700, color: C.white, marginBottom: 4 }}>ZAYO Purchase Request Assistant</div>
-        <div style={{ fontSize: 13, color: C.subtle }}>Create and track purchase requests through a guided conversation</div>
+        <div style={{ fontSize: 22, fontWeight: 700, color: C.white, marginBottom: 4 }}>ZAYO Purchase Requisition</div>
+        <div style={{ fontSize: 13, color: C.subtle }}>Create and track purchase requisitions through a guided conversation</div>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14, marginBottom: 24, maxWidth: 380 }}>
         <div onClick={() => startInquiry()} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, cursor: "pointer", borderTop: `3px solid ${C.orange}` }}>
           <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", marginBottom: 10 }}>Z</div>
-          <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>Create Purchase Request</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>Create Purchase Requisition</div>
           <div style={{ fontSize: 11, color: C.subtle }}>Start with a guided item number question</div>
         </div>
       </div>
       <div style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden", maxWidth: 600 }}>
         <div style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}` }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: C.white }}>Recent Purchase Requests</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: C.white }}>Recent Purchase Requisitions</div>
         </div>
         {purchaseRequests.map(pr => (
           <div key={pr.id} style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -742,7 +742,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 12, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
-              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer", whiteSpace: "nowrap" }}>Re-initiate Purchase Request</button>
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer", whiteSpace: "nowrap" }}>Re-initiate Purchase Requisition</button>
             </div>
           </div>
         ))}
@@ -756,14 +756,14 @@ export default function App() {
         <button onClick={() => setScreen("home")} style={{ background: "transparent", border: "none", color: C.subtle, cursor: "pointer", fontSize: 16 }}>Back</button>
         <div style={{ width: 28, height: 28, background: C.orange, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#ffffff", fontWeight: 900 }}>Z</div>
         <div>
-          <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Request Assistant</div>
+          <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Requisition</div>
           <div style={{ color: C.good, fontSize: 9, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: C.good }} />Active</div>
         </div>
-        <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : purchaseRequestType === "expense" ? "Expense Purchase Request" : "Create Purchase Request"}</div>
+        <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Requisition" : purchaseRequestType === "expense" ? "Expense Purchase Requisition" : "Create Purchase Requisition"}</div>
       </div>
       {purchaseRequestType && <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 16px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
-          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request Progress" : "Expense Purchase Request Progress"}</span>
+          <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Requisition Progress" : "Expense Purchase Requisition Progress"}</span>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
             <button
@@ -915,7 +915,7 @@ export default function App() {
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", flex: 1, maxWidth: "85%" }}>
                   <div style={{ background: C.navy, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>Purchase Request Summary</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>Purchase Requisition Summary</div>
                     <span style={{ background: C.warn + "22", color: C.warn, fontSize: 10, padding: "2px 8px", borderRadius: 10 }}>Draft</span>
                   </div>
                   <div style={{ padding: "12px 14px" }}>
@@ -938,7 +938,7 @@ export default function App() {
                     </details>
                   </div>
                   <div style={{ padding: "10px 14px", display: "flex", gap: 8, borderTop: `1px solid ${C.border}` }}>
-                    <button disabled={!isActivePrompt} onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: isActivePrompt ? "pointer" : "default", opacity: isActivePrompt ? 1 : 0.45 }}>Submit Purchase Request</button>
+                    <button disabled={!isActivePrompt} onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: isActivePrompt ? "pointer" : "default", opacity: isActivePrompt ? 1 : 0.45 }}>Submit Purchase Requisition</button>
                     <button onClick={() => purchaseRequestType ? startChat(purchaseRequestType, true) : startInquiry(true)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
                   </div>
                 </div>
@@ -951,10 +951,10 @@ export default function App() {
                 <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", maxWidth: "85%", width: "min(100%, 520px)" }}>
                   <div style={{ background: C.good + "22", padding: "16px 14px", textAlign: "center" }}>
                     <div style={{ width: 44, height: 44, background: C.orange, borderRadius: 9, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#ffffff", fontWeight: 900, fontStyle: "italic", marginBottom: 8 }}>Z</div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: C.good }}>Purchase Request Submitted Successfully!</div>
+                    <div style={{ fontSize: 16, fontWeight: 700, color: C.good }}>Purchase Requisition Submitted Successfully!</div>
                   </div>
                   <div style={{ padding: 14 }}>
-                    {[{ label: "Purchase Request Number", value: msg.cardData.purchaseRequestNumber }, { label: "Purchase Request Type", value: msg.cardData.purchaseRequestType }, { label: "Status", value: "Pending Approval" }, { label: "Submitted", value: new Date().toLocaleDateString() }].map(f => (
+                    {[{ label: "Purchase Requisition Number", value: msg.cardData.purchaseRequestNumber }, { label: "Purchase Requisition Type", value: msg.cardData.purchaseRequestType }, { label: "Status", value: "Pending Approval" }, { label: "Submitted", value: new Date().toLocaleDateString() }].map(f => (
                       <div key={f.label} style={{ display: "flex", justifyContent: "space-between", gap: 16, padding: "6px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12 }}>
                         <span style={{ color: C.subtle }}>{f.label}</span>
                         <span style={{ color: C.white, fontWeight: 600, textAlign: "right" }}>{f.value}</span>
@@ -972,8 +972,8 @@ export default function App() {
                       </div>
                     </details>
                     <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-                      <button onClick={() => setScreen("my-purchase-requests")} style={{ flex: 1, background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer" }}>View My Purchase Requests</button>
-                      <button onClick={() => startInquiry(true)} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: "#ffffff", cursor: "pointer", fontWeight: 600 }}>New Purchase Request</button>
+                      <button onClick={() => setScreen("my-purchase-requests")} style={{ flex: 1, background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer" }}>View My Purchase Requisitions</button>
+                      <button onClick={() => startInquiry(true)} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: "#ffffff", cursor: "pointer", fontWeight: 600 }}>New Purchase Requisition</button>
                     </div>
                   </div>
                 </div>
@@ -988,7 +988,7 @@ export default function App() {
 
   const MyPurchaseRequestsScreen = () => (
     <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
-      <div style={{ fontSize: 20, fontWeight: 700, color: C.white, marginBottom: 16 }}>My Purchase Requests</div>
+      <div style={{ fontSize: 20, fontWeight: 700, color: C.white, marginBottom: 16 }}>My Purchase Requisitions</div>
       <div style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden" }}>
         {purchaseRequests.map(pr => (
           <div key={pr.id} style={{ padding: "12px 16px", borderBottom: `1px solid ${C.border}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -999,7 +999,7 @@ export default function App() {
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <span style={{ fontSize: 13, color: C.white, fontWeight: 600 }}>{pr.amount}</span>
               <Badge status={pr.status} />
-              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Re-initiate Purchase Request</button>
+              <button onClick={() => startChat(pr.type === "Inventory" ? "inventory" : "expense", true)} style={{ background: C.orange + "22", border: `1px solid ${C.orange}44`, borderRadius: 6, padding: "4px 10px", fontSize: 11, color: C.orange, cursor: "pointer" }}>Re-initiate Purchase Requisition</button>
             </div>
           </div>
         ))}
@@ -1049,6 +1049,7 @@ export default function App() {
     </div>
   );
 }
+
 
 
 
