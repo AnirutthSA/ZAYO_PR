@@ -199,7 +199,6 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [isTyping, setIsTyping] = useState(false);
   const messagesScrollRef = useRef<HTMLDivElement>(null);
 
   const themeOptions: { mode: ThemeMode; label: string }[] = [
@@ -343,7 +342,7 @@ export default function App() {
   };
 
   const addMessage = (msg: Omit<Message, "id">) => {
-    const shouldAnimate = ["bot", "options", "input"].includes(msg.type);
+    const shouldAnimate = msg.type === "bot";
     setMessages(prev => [...prev, { ...msg, animate: msg.animate ?? shouldAnimate, id: Date.now().toString() + Math.random() }]);
   };
 
@@ -512,9 +511,7 @@ export default function App() {
       if (item) {
         const autoFilled = { ...newData, itemMaster: item.id, itemName: item.name, unitPrice: item.unitPrice };
         setPurchaseRequestData(autoFilled);
-        setIsTyping(true);
         setTimeout(() => {
-          setIsTyping(false);
           addMessage({ type: "bot", content: "I found the catalog item and will continue with the Inventory Purchase Request process." });
           addMessage({ type: "card", cardData: { title: "Item Found and Auto-Filled", facts: [
             { label: "Item Number", value: item.id },
@@ -577,9 +574,7 @@ export default function App() {
       showNextStep(stepIndex + 1, steps, data);
       return;
     }
-    setIsTyping(true);
     setTimeout(() => {
-      setIsTyping(false);
       if (step.type === "options" || step.type === "acknowledge") {
         const opts = step.type === "acknowledge" ? [{ label: "Yes", value: "yes" }] : step.options;
         addMessage({ type: "options", content: step.message, field: step.field, options: opts });
@@ -589,9 +584,7 @@ export default function App() {
     }, 600);
   };
   const showReview = (data: any) => {
-    setIsTyping(true);
     setTimeout(() => {
-      setIsTyping(false);
       if (purchaseRequestType === "inventory") {
         const quantity = Number(data.quantity || 0);
         const unitPrice = Number(data.unitPrice || 0);
@@ -639,7 +632,6 @@ export default function App() {
         return;
       }
     }
-    setIsTyping(true);
     setTimeout(() => {
       const purchaseRequestNumber = `Purchase Request ${Date.now().toString().slice(-6)}`;
       const summary = getPurchaseRequestSummary(purchaseRequestData, purchaseRequestType);
@@ -654,7 +646,6 @@ export default function App() {
         },
         ...prev,
       ]);
-      setIsTyping(false);
       addMessage({ type: "success", cardData: { purchaseRequestNumber, purchaseRequestType: purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request", submittedFields: purchaseRequestData } });
     }, 1000);
   };
@@ -761,7 +752,20 @@ export default function App() {
       {purchaseRequestType && <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 12px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
           <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>Purchase Request Progress</span>
-          <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
+            <button
+              onClick={() => purchaseRequestType && startChat(purchaseRequestType, true)}
+              title="Restart conversation"
+              aria-label="Restart conversation"
+              style={{ width: 26, height: 26, borderRadius: "50%", border: `1px solid ${C.orange}66`, background: C.orange + "18", color: C.orange, cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 11a8 8 0 1 0-2.34 5.66" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M20 4v7h-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
         </div>
         <div style={{ position: "relative", display: "grid", gridTemplateColumns: `repeat(${activeSteps.length}, minmax(24px, 1fr))`, alignItems: "center", gap: 4 }}>
           <div style={{ position: "absolute", left: 12, right: 12, top: 13, height: 3, background: C.dark, borderRadius: 999 }} />
@@ -817,7 +821,7 @@ export default function App() {
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
+                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
                     {msg.options?.map(opt => (
                       <button key={opt.value} onClick={() => msg.field && handleUserInput(opt.value, msg.field, `${opt.label}`)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: "7px 14px", fontSize: 12, color: C.white, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontWeight: 500 }}>
@@ -833,7 +837,7 @@ export default function App() {
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
                 <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
+                  <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   {msg.searchable ? (
                     <div style={{ position: "relative" }}>
                       <input value={inputValue} onChange={e => handleSearch(e.target.value)} placeholder={msg.placeholder} style={{ width: "100%", background: C.card, border: `1px solid ${C.orange}`, borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.white, outline: "none", boxSizing: "border-box" }} />
@@ -947,15 +951,6 @@ export default function App() {
             )}
           </div>
         ))}
-
-        {isTyping && (
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900 }}>Z</div>
-            <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", display: "flex", gap: 4 }}>
-              {[0, 1, 2].map(i => <div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: C.subtle, animation: `bounce 1s ${i * 0.2}s infinite` }} />)}
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
@@ -1023,6 +1018,11 @@ export default function App() {
     </div>
   );
 }
+
+
+
+
+
 
 
 
