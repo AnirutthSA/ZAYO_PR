@@ -251,6 +251,37 @@ export default function App() {
     };
   };
 
+  const startInquiry = (forceNew = false) => {
+    if (!forceNew && messages.length > 0 && !hasSubmitted) {
+      setScreen("chat");
+      return;
+    }
+
+    setPurchaseRequestType(null);
+    setPurchaseRequestData({});
+    setCurrentStep(0);
+    setMessages([]);
+    setInputValue("");
+    setSearchResults([]);
+    setScreen("chat");
+
+    setTimeout(() => {
+      addMessage({ type: "bot", content: "Welcome. I can help you create a Purchase Request." });
+    }, 300);
+
+    setTimeout(() => {
+      addMessage({
+        type: "options",
+        content: "Do you know the item number for this purchase?",
+        field: "purchaseRequestInquiry",
+        options: [
+          { label: "Yes, I know the item number", value: "inventory" },
+          { label: "No, create an expense request", value: "expense" },
+        ],
+      });
+    }, 900);
+  };
+
   const startChat = (type: PurchaseRequestType, forceNew = false) => {
     if (!type) return;
     if (!forceNew && purchaseRequestType === type && messages.length > 0 && !hasSubmitted) {
@@ -279,6 +310,11 @@ export default function App() {
 
   const handleUserInput = (value: string, field: string, displayValue?: string) => {
     addMessage({ type: "user", content: displayValue || value });
+    if (field === "purchaseRequestInquiry") {
+      setTimeout(() => startChat(value === "inventory" ? "inventory" : "expense", true), 350);
+      return;
+    }
+
     const newData = { ...purchaseRequestData, [field]: value };
     setPurchaseRequestData(newData);
 
@@ -411,11 +447,10 @@ export default function App() {
         })}
         <div style={{ padding: isSidebarCollapsed ? "14px 8px 8px" : "16px 14px 8px" }}>
           {!isSidebarCollapsed && <div style={{ fontSize: 9, color: C.subtle, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Create Purchase Request</div>}
-          {[{ type: "inventory" as PurchaseRequestType, label: "Inventory Purchase Request" }, { type: "expense" as PurchaseRequestType, label: "Expense Purchase Request" }].map(item => (
-            <div key={item.type} title={isSidebarCollapsed ? item.label : undefined} onClick={() => startChat(item.type)} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
-              {isSidebarCollapsed ? item.label.split(" ")[0] : item.label}
-            </div>
-          ))}
+          <div title={isSidebarCollapsed ? "Create Purchase Request" : undefined} onClick={() => startInquiry()} style={{ padding: isSidebarCollapsed ? "8px 4px" : "8px 10px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "flex-start", gap: 8, fontSize: isSidebarCollapsed ? 10 : 11, color: C.subtle, borderRadius: 6, marginBottom: 4, textAlign: "center" }}>
+            <NavIcon name="current" color={C.subtle} />
+            {!isSidebarCollapsed && "Create Purchase Request"}
+          </div>
         </div>
       </nav>
       <div style={{ padding: "8px 0 10px", borderTop: `1px solid ${C.border}` }}>
@@ -440,14 +475,12 @@ export default function App() {
         <div style={{ fontSize: 22, fontWeight: 700, color: C.white, marginBottom: 4 }}>ZAYO Purchase Request Assistant</div>
         <div style={{ fontSize: 13, color: C.subtle }}>Create and track purchase requests through a guided conversation</div>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 24, maxWidth: 500 }}>
-        {[{ type: "inventory" as PurchaseRequestType, title: "Inventory Purchase Request", desc: "Request items from item master with auto-fill", color: C.orange }, { type: "expense" as PurchaseRequestType, title: "Expense Purchase Request", desc: "Request goods or services with custom details", color: C.navy }].map(card => (
-          <div key={card.type} onClick={() => startChat(card.type)} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, cursor: "pointer", borderTop: `3px solid ${card.color}` }}>
-            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", marginBottom: 10 }}>Z</div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>{card.title}</div>
-            <div style={{ fontSize: 11, color: C.subtle }}>{card.desc}</div>
-          </div>
-        ))}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14, marginBottom: 24, maxWidth: 380 }}>
+        <div onClick={() => startInquiry()} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, cursor: "pointer", borderTop: `3px solid ${C.orange}` }}>
+          <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", marginBottom: 10 }}>Z</div>
+          <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>Create Purchase Request</div>
+          <div style={{ fontSize: 11, color: C.subtle }}>Start with a guided item number question</div>
+        </div>
       </div>
       <div style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 10, overflow: "hidden", maxWidth: 600 }}>
         <div style={{ padding: "10px 14px", borderBottom: `1px solid ${C.border}` }}>
@@ -479,9 +512,9 @@ export default function App() {
           <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Request Assistant</div>
           <div style={{ color: C.good, fontSize: 9, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: C.good }} />Active</div>
         </div>
-        <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : "Expense Purchase Request"}</div>
+        <div style={{ marginLeft: "auto", marginRight: 150, fontSize: 10, color: C.subtle }}>{purchaseRequestType === "inventory" ? "Inventory Purchase Request" : purchaseRequestType === "expense" ? "Expense Purchase Request" : "Create Purchase Request"}</div>
       </div>
-      <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 12px", flexShrink: 0 }}>
+      {purchaseRequestType && <div style={{ background: C.mid, borderBottom: `1px solid ${C.border}`, padding: "10px 16px 12px", flexShrink: 0 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
           <span style={{ color: C.text, fontSize: 11, fontWeight: 700 }}>Purchase Request Progress</span>
           <span style={{ color: C.subtle, fontSize: 10 }}>{progressStep} of {activeSteps.length}</span>
@@ -501,7 +534,7 @@ export default function App() {
             );
           })}
         </div>
-      </div>
+      </div>}
 
       <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.map(msg => (
@@ -613,7 +646,7 @@ export default function App() {
                   </div>
                   <div style={{ padding: "10px 14px", display: "flex", gap: 8, borderTop: `1px solid ${C.border}` }}>
                     <button onClick={submitPurchaseRequest} style={{ flex: 1, background: C.good, border: "none", borderRadius: 8, padding: "10px", fontSize: 13, fontWeight: 700, color: C.white, cursor: "pointer" }}>Submit Purchase Request</button>
-                    <button onClick={() => startChat(purchaseRequestType, true)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
+                    <button onClick={() => purchaseRequestType ? startChat(purchaseRequestType, true) : startInquiry(true)} style={{ background: "transparent", border: `1px solid ${C.border}`, borderRadius: 8, padding: "10px 14px", fontSize: 12, color: C.subtle, cursor: "pointer" }}>Start Over</button>
                   </div>
                 </div>
               </div>
@@ -636,7 +669,7 @@ export default function App() {
                     ))}
                     <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
                       <button onClick={() => setScreen("my-purchase-requests")} style={{ flex: 1, background: C.mid, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer" }}>View My Purchase Requests</button>
-                      <button onClick={() => setScreen("home")} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer", fontWeight: 600 }}>New Purchase Request</button>
+                      <button onClick={() => startInquiry(true)} style={{ flex: 1, background: C.orange, border: "none", borderRadius: 8, padding: "8px", fontSize: 12, color: C.white, cursor: "pointer", fontWeight: 600 }}>New Purchase Request</button>
                     </div>
                   </div>
                 </div>
@@ -721,6 +754,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
