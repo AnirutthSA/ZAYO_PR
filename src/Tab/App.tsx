@@ -161,6 +161,7 @@ export default function App() {
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesScrollRef = useRef<HTMLDivElement>(null);
 
   const themeOptions: { mode: ThemeMode; label: string }[] = [
     { mode: "dark", label: "Dark" },
@@ -237,7 +238,11 @@ export default function App() {
     </div>
   );
 
-  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => {
+    const messageContainer = messagesScrollRef.current;
+    if (!messageContainer) return;
+    messageContainer.scrollTo({ top: messageContainer.scrollHeight, behavior: "smooth" });
+  }, [messages, isTyping]);
 
   const addMessage = (msg: Omit<Message, "id">) => {
     setMessages(prev => [...prev, { ...msg, id: Date.now().toString() + Math.random() }]);
@@ -651,7 +656,7 @@ export default function App() {
         </div>
       </div>}
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
+      <div ref={messagesScrollRef} style={{ flex: 1, overflowY: "auto", overscrollBehavior: "contain", padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
         {messages.map(msg => (
           <div key={msg.id}>
             {msg.type === "bot" && (
@@ -884,6 +889,8 @@ export default function App() {
     </div>
   );
 }
+
+
 
 
 
