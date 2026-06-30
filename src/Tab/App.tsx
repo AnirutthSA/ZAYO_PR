@@ -65,7 +65,6 @@ const warehouseOptions = toOptions(itemMasterData.map(item => item.warehouse));
 
 const TypewriterText = ({ text = "", animate, onTick, onDone }: { text?: string; animate?: boolean; onTick?: () => void; onDone?: () => void }) => {
   const [visibleText, setVisibleText] = useState(animate ? "" : text);
-
   useEffect(() => {
     if (!animate) {
       setVisibleText(text);
@@ -277,6 +276,30 @@ export default function App() {
           {option.label}
         </button>
       ))}
+    </div>
+  );
+  const LogoMark = ({ size = 34, style = {} }: { size?: number; style?: any }) => (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        background: "#ffffff",
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+        boxShadow: `0 2px 8px ${C.shadow}`,
+        ...style,
+      }}
+    >
+      <svg width={size} height={size} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <circle cx="50" cy="50" r="43" fill="#ffffff" stroke={C.orange} strokeWidth="8" />
+        <path fill={C.orange} d="M27 28h45L61 40H38v10H27V28z" />
+        <path fill={C.orange} d="M66 29h13v14L40 82H27z" />
+        <path fill={C.orange} d="M63 59h16v17H38l12-13h13z" />
+        <path fill="#ffffff" d="M64 31h7L37 77h-7z" />
+      </svg>
     </div>
   );
 
@@ -666,7 +689,7 @@ export default function App() {
       <div style={{ padding: isSidebarCollapsed ? "12px 10px" : "16px 14px 12px", borderBottom: `1px solid ${C.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: isSidebarCollapsed ? "center" : "space-between", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-            <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", flexShrink: 0 }}>Z</div>
+            <LogoMark size={36} />
             {!isSidebarCollapsed && (
               <div style={{ minWidth: 0 }}>
                 <div style={{ color: C.white, fontWeight: 700, fontSize: 12, whiteSpace: "nowrap" }}>ZAYO Purchase Requisition</div>
@@ -724,7 +747,7 @@ export default function App() {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 14, marginBottom: 24, maxWidth: 380 }}>
         <div onClick={() => startInquiry()} style={{ background: C.mid, border: `1px solid ${C.border}`, borderRadius: 12, padding: 18, cursor: "pointer", borderTop: `3px solid ${C.orange}` }}>
-          <div style={{ width: 30, height: 30, background: C.orange, borderRadius: 7, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "#ffffff", fontStyle: "italic", marginBottom: 10 }}>Z</div>
+          <LogoMark size={40} style={{ marginBottom: 10 }} />
           <div style={{ fontSize: 14, fontWeight: 700, color: C.white, marginBottom: 4 }}>Create Purchase Requisition</div>
           <div style={{ fontSize: 11, color: C.subtle }}>Start with a guided item number question</div>
         </div>
@@ -754,7 +777,7 @@ export default function App() {
     <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <div style={{ background: C.navy, borderBottom: `2px solid ${C.orange}`, padding: "10px 16px", display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
         <button onClick={() => setScreen("home")} style={{ background: "transparent", border: "none", color: C.subtle, cursor: "pointer", fontSize: 16 }}>Back</button>
-        <div style={{ width: 28, height: 28, background: C.orange, borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, color: "#ffffff", fontWeight: 900 }}>Z</div>
+        <LogoMark size={34} />
         <div>
           <div style={{ color: C.white, fontWeight: 700, fontSize: 13 }}>Purchase Requisition</div>
           <div style={{ color: C.good, fontSize: 9, display: "flex", alignItems: "center", gap: 4 }}><div style={{ width: 6, height: 6, borderRadius: "50%", background: C.good }} />Active</div>
@@ -806,20 +829,20 @@ export default function App() {
           <div key={msg.id}>
             {msg.type === "bot" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}><TypewriterText text={msg.content} animate={msg.animate} onTick={keepMessagesAtBottom} onDone={() => markMessageTyped(msg.id)} /></div>
               </div>
             )}
 
             {msg.type === "user" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "80%" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, lineHeight: 1.6, whiteSpace: "pre-wrap" }}>You entered: {msg.content}</div>
               </div>
             )}
             {msg.type === "card" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start", maxWidth: "85%" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", flex: 1 }}>
                   <div style={{ background: C.good + "22", padding: "8px 12px", fontSize: 11, fontWeight: 700, color: C.good }}>{msg.cardData.title}</div>
                   <div style={{ padding: "10px 12px" }}>
@@ -836,7 +859,7 @@ export default function App() {
 
             {msg.type === "options" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ flex: 1 }}>
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -852,7 +875,7 @@ export default function App() {
 
             {msg.type === "input" && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ flex: 1 }}>
                   <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", padding: "10px 14px", fontSize: 13, color: C.text, marginBottom: 8, lineHeight: 1.6 }}>{msg.content}</div>
                   {msg.searchable ? (
@@ -912,7 +935,7 @@ export default function App() {
 
             {msg.type === "review" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", flex: 1, maxWidth: "85%" }}>
                   <div style={{ background: C.navy, padding: "10px 14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ fontSize: 13, fontWeight: 700, color: C.white }}>Purchase Requisition Summary</div>
@@ -947,10 +970,10 @@ export default function App() {
 
             {msg.type === "success" && msg.cardData && (
               <div style={{ display: "flex", gap: 8, alignItems: "flex-start" }}>
-                <div style={{ width: 28, height: 28, borderRadius: "50%", background: C.orange, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#ffffff", fontWeight: 900, flexShrink: 0 }}>Z</div>
+                <LogoMark size={34} />
                 <div style={{ background: C.card, border: `1px solid ${C.good}44`, borderRadius: "4px 12px 12px 12px", overflow: "hidden", maxWidth: "85%", width: "min(100%, 520px)" }}>
                   <div style={{ background: C.good + "22", padding: "16px 14px", textAlign: "center" }}>
-                    <div style={{ width: 44, height: 44, background: C.orange, borderRadius: 9, display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 22, color: "#ffffff", fontWeight: 900, fontStyle: "italic", marginBottom: 8 }}>Z</div>
+                    <LogoMark size={62} style={{ marginBottom: 8 }} />
                     <div style={{ fontSize: 16, fontWeight: 700, color: C.good }}>Purchase Requisition Submitted Successfully!</div>
                   </div>
                   <div style={{ padding: 14 }}>
